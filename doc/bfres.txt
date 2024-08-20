@@ -1,0 +1,459 @@
+BFRES version 8.0.0
+
+
+===== nn::g3d::ResFile =====
+
+offset | size | type                            | description
+-------+------+---------------------------------+-------------------------------------------------
+0x00   | 0x20 | nn::util::BinaryFileHeader      | base header (signature 'FRES    ' (4 spaces))
+0x20   | 0x8  | nn::util::ResString*            | filename offset
+0x28   | 0x8  | nn::g3d::ResModel*              | offset of model array
+0x30   | 0x8  | nn::util::ResDic*               | offset of model dictionary
+0x38   | 0x8  | nn::g3d::ResSkeletalAnim*       | offset of skeletal animation array
+0x40   | 0x8  | nn::util::ResDic*               | offset of skeletal animation dictionary
+0x48   | 0x8  | nn::g3d::ResMaterialAnim*       | offset of material animation array
+0x50   | 0x8  | nn::util::ResDic*               | offset of material animation dictionary
+0x58   | 0x8  | nn::g3d::ResBoneVisibilityAnim* | offset of bone visibility animation array
+0x60   | 0x8  | nn::util::ResDic*               | offset of bone visibility animation dictionary
+0x68   | 0x8  | nn::g3d::ResShapeAnim*          | offset of shape animation array
+0x70   | 0x8  | nn::util::ResDic*               | offset of shape animation dictionary
+0x78   | 0x8  | nn::g3d::ResSceneAnim*          | offset of scene animation array
+0x80   | 0x8  | nn::util::ResDic*               | offset of scene animation dictionary
+0x88   | 0x8  | nn::gfx::TMemoryPool*           | offset of runtime memory pool
+0x90   | 0x8  | nn::gfx::MemoryPoolInfo         | memory pool info
+0x98   | 0x8  | nn::gfx::ResEmbedFile*          | offset of embedded file array
+0xa0   | 0x8  | nn::util::ResDic*               | offset of embedded file dictionary
+0xa8   | 0x8  |                                 | (also points to filename ResString?)
+0xb0   | 0x8  | StringPool*                     | string pool offset (wrong by +0x14?)
+0xb8   | 0x4  | u32                             | string pool count
+0xbc   | 0x2  | u16                             | number of models
+0xbe   | 0x2  | u16                             | number of skeletal animations
+0xc0   | 0x2  | u16                             | number of material animations
+0xc2   | 0x2  | u16                             | number of bone visibility animations
+0xc4   | 0x2  | u16                             | number of shape animations
+0xc6   | 0x2  | u16                             | number of scene animations
+0xc8   | 0x2  | u16                             | number of embedded files
+0xca   | 0x6  |                                 | padding
+0xd0   |      |                                 | end
+
+
+===== nn::g3d::ResModel =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+--------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | base header (signature 'FMDL')
+0x10   | 0x08 | nn::util::ResString*        | offset of model name
+0x18   | 0x08 | ???                         | offset of path name
+0x20   | 0x08 | nn::g3d::ResSkeleton*       | offset of skeleton
+0x28   | 0x08 | nn::g3d::ResVertex*         | offset of vertex array
+0x30   | 0x08 | nn::g3d::ResShape*          | offset of shape array
+0x38   | 0x08 | nn::util::ResDic*           | offset of shape dictionary
+0x40   | 0x08 | nn::g3d::ResMaterial*       | offset of material array
+0x48   | 0x08 | nn::util::ResDic*           | offset of material dictionary
+0x50   | 0x08 | UserData*                   | offset of user data array
+0x58   | 0x08 | nn::util::ResDic*           | offset of user data dictionary
+0x60   | 0x08 | void*                       | user pointer
+0x68   | 0x02 | u16                         | length of vertex array
+0x6a   | 0x02 | u16                         | length of shape array
+0x6c   | 0x02 | u16                         | length of material array
+0x6e   | 0x02 | u16                         | length of user data array
+0x70   | 0x04 | u32                         | number of total vertices
+0x74   | 0x04 |                             | padding
+0x78   |      |                             | end
+
+
+===== nn::g3d::ResSkeleton =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+---------------------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | base header (signature 'FSKL')
+0x10   | 0x08 | nn::util::ResDic*           | bone dict offset
+0x18   | 0x08 | nn::g3d::ResBone*           | bone array offset
+0x20   | 0x08 | u16*                        | matrix to bone list offset (smooth + rigid)
+0x28   | 0x08 | void*                       | inverse model matrices offset (smooth)
+0x30   | 0x08 |                             | 
+0x38   | 0x08 |                             | 
+0x40   | 0x08 | void*                       | user pointer
+0x48   | 0x04 | u32                         | flags
+0x4c   | 0x02 | u16                         | bone count
+0x4e   | 0x02 | u16                         | smooth matrix count
+0x50   | 0x02 | u16                         | rigid matrix count
+0x52   | 0x06 |                             | padding
+0x58   |      |                             | end
+
+
+===== nn::g3d::ResBone =====
+
+offset | size | type                 | description
+-------+------+----------------------+---------------------------------------------------
+0x00   | 0x08 | nn::util::ResString* | name offset
+0x08   | 0x08 | UserData*            | user data array offset
+0x10   | 0x08 | nn::util::ResDic*    | user data dict offset
+0x18   | 0x08 |                      | 
+0x20   | 0x08 |                      | 
+0x28   | 0x02 | u16                  | index
+0x2a   | 0x02 | s16                  | parent index
+0x2c   | 0x02 | s16                  | smooth matrix index
+0x2e   | 0x02 | s16                  | rigid matrix index
+0x30   | 0x02 | s16                  | billboard index
+0x32   | 0x02 | u16                  | user data count
+0x34   | 0x04 | u32                  | flags
+0x38   | 0x0c | f32[3]               | scale
+0x44   | 0x10 | f32[4]               | rotation
+0x54   | 0x0c | f32[3]               | position
+0x60   |      |                      | end
+
+
+===== nn::g3d::ResVertex =====
+
+offset | size | type                 | description
+-------+------+----------------------+------------------------------------
+0x00   | 0x04 | char[4]              | signature 'FVTX'
+0x04   | 0x0c |                      | padding
+0x10   | 0x08 | VertexAttrib*        | vertex attribute array offset
+0x18   | 0x08 | nn::util::ResDic*    | vertex attribute dict offset
+0x20   | 0x08 | nn::gfx::TMemoryPool | runtime memory pool offset
+0x28   | 0x08 | void*                | 
+0x30   | 0x08 | void*                | 
+0x38   | 0x08 | u64*                 | vertex buffer size offset
+0x40   | 0x08 | u64*                 | vertex buffer stride offset
+0x48   | 0x08 |                      | padding?
+0x50   | 0x04 | u32                  | vertex buffer offset
+0x54   | 0x01 | u8                   | vertex attribute count
+0x55   | 0x01 | u8                   | vertex buffer count
+0x56   | 0x02 | u16                  | vertex index?
+0x58   | 0x04 | u32                  | vertex buffer vertex count
+0x5c   | 0x02 | u16                  | vertex skin count?
+0x5e   | 0x02 | u16                  | vertex gpu buffer alignment?
+0x60   |      |                      | end
+
+
+===== VertexAttrib =====
+
+offset | size | type                 | description
+-------+------+----------------------+---------------
+0x00   | 0x08 | nn::util::ResString* | name offset
+0x08   | 0x02 | u16                  | format
+0x0a   | 0x02 |                      | padding?
+0x0c   | 0x02 | u16                  | offset
+0x0e   | 0x02 | u16                  | buffer index
+0x10   |      |                      | end
+
+
+===== nn::g3d::ResShape =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | base header (signature 'FSHP')
+0x10   | 0x08 | nn::util::ResString*        | name offset
+0x18   | 0x08 | nn::g3d::ResVertex*         | vertex buffer offset
+0x20   | 0x08 | nn::g3d::ResMesh*           | mesh array offset
+0x28   | 0x08 | u16*                        | skin bone index array offset
+0x30   | 0x08 | KeyShape*                   | key shape array offset
+0x38   | 0x08 | nn::util::ResDic*           | key shape dict offset
+0x40   | 0x08 | f32[6]*                     | bounding box array offset
+0x48   | 0x08 | f32*                        | radius array offset
+0x50   | 0x08 | UserData*                   | user data offset
+0x58   | 0x04 | u32                         | flags
+0x5c   | 0x02 | u16                         | index
+0x5e   | 0x02 | u16                         | material index
+0x60   | 0x02 | u16                         | bone index
+0x62   | 0x02 | u16                         | vertex buffer index
+0x64   | 0x02 | u16                         | skin bone index count
+0x66   | 0x01 | u8                          | vertex skin count
+0x67   | 0x01 | u8                          | mesh count
+0x68   | 0x01 | u8                          | key shape count
+0x69   | 0x01 | u8                          | target attribute count
+0x6a   | 0x06 |                             | padding
+0x70   |      |                             | end
+
+
+===== nn::g3d::ResMesh =====
+
+offset | size | type                    | description
+-------+------+-------------------------+------------------------------------
+0x00   | 0x08 | SubMesh*                | sub-mesh array offset
+0x08   | 0x08 | nn::gfx::TMemoryPool*   | runtime memory pool offset
+0x10   | 0x08 |                         | buffer offset
+0x18   | 0x08 | BufferSize*             | buffer size
+0x20   | 0x04 | u32                     | face buffer offset
+0x24   | 0x04 | u32                     | primitive type
+0x28   | 0x04 | u32                     | index format
+0x2c   | 0x04 | u32                     | index count
+0x30   | 0x04 | u32                     | first vertex index
+0x34   | 0x02 | u16                     | sub-mesh count
+0x36   | 0x02 |                         | padding
+0x38   |      |                         | end
+
+
+===== SubMesh =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x04 | u32  | offset
+0x04   | 0x04 | u32  | count
+0x08   |      |      | end
+
+
+===== KeyShape =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+
+
+===== nn::g3d::ResMaterial =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | base header (signature 'FMAT')
+0x10   | 0x08 | nn::util::ResString*        | name offset
+0x18   | 0x08 | RenderInfo*                 | render info array offset
+0x20   | 0x08 | nn::gfx::ResDic*            | render info dict offset
+0x28   | 0x08 | ShaderAssign*               | shader assign offset
+0x30   | 0x08 |                             | texture array offset
+0x38   | 0x08 |                             | texture name array offset
+0x40   | 0x08 |                             | sampler array offset
+0x48   | 0x08 | Sampler*                    | sampler array offset(?)
+0x50   | 0x08 | nn::util::ResDic*           | sampler dict offset
+0x58   | 0x08 | ShaderParam*                | shader param array offset
+0x60   | 0x08 | nn::util::ResDic*           | shader param dict offset
+0x68   | 0x08 |                             | source param data offset
+0x70   | 0x08 | UserData*                   | user data array offset
+0x78   | 0x08 | nn::util::ResDic*           | user data dict offset
+0x80   | 0x08 |                             | volatile flags offset
+0x88   | 0x08 | void*                       | user pointer
+0x90   | 0x08 | s64*                        | sampler slot array offset
+0x98   | 0x08 | s64*                        | texture slot array offset
+0xa0   | 0x04 | u32                         | flags
+0xa4   | 0x02 | u16                         | index
+0xa6   | 0x02 | u16                         | render info count
+0xa8   | 0x01 | u8                          | texture count
+0xa9   | 0x01 | u8                          | sampler count
+0xaa   | 0x02 | u16                         | shader param count
+0xac   | 0x02 | u16                         | shader param volatile count
+0xae   | 0x02 | u16                         | source param size
+0xb0   | 0x02 | u16                         | raw param size
+0xb2   | 0x02 | u16                         | user data count
+0xb4   | 0x04 |                             | padding
+0xb8   |      |                             | end
+
+
+===== RenderInfo =====
+
+offset | size | type                 | description
+-------+------+----------------------+---------------------------------------------------
+0x00   | 0x08 | nn::util::ResString* | name offset
+0x08   | 0x08 | void*                | data offset
+0x10   | 0x02 | u16                  | data count
+0x12   | 0x01 | u8                   | render info type (0 = s32, 1 = f32, 2 = string*)
+0x13   | 0x05 |                      | padding
+0x18   |      |                      | end
+
+
+===== ShaderAssign =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+0x00   | 0x08 | nn::util::ResString*        | shader archive name offset
+0x08   | 0x08 | nn::util::ResString*        | shading model name offset
+0x10   | 0x08 | nn::util::ResString**       | attribute assigns array offset
+0x18   | 0x08 | nn::util::ResDic*           | attribute assigns dict offset
+0x20   | 0x08 | nn::util::ResString**       | sampler assigns array offset
+0x28   | 0x08 | nn::util::ResDic*           | sampler assigns dict offset
+0x30   | 0x08 | nn::util::ResString**       | shader options array offset
+0x38   | 0x08 | nn::util::ResDic*           | shader options dict offset
+0x40   | 0x04 | u32                         | revision
+0x44   | 0x01 | u8                          | attribute assigns count
+0x45   | 0x01 | u8                          | sampler assigns count
+0x46   | 0x02 | u16                         | shader options count
+0x48   |      |                             | end
+
+
+===== Sampler =====
+
+offset | size | type | description
+-------+------+------+-----------------------
+0x00   | 0x01 | u8   | wrap mode U
+0x01   | 0x01 | u8   | wrap mode V
+0x02   | 0x01 | u8   | wrap mode W
+0x03   | 0x01 | u8   | compare function
+0x04   | 0x01 | u8   | border color type
+0x05   | 0x01 | u8   | anisotropic
+0x06   | 0x02 | u16  | filter flags
+0x08   | 0x04 | f32  | min level of detail
+0x0c   | 0x04 | f32  | max level of detail
+0x10   | 0x04 | f32  | level of detail bias
+0x14   | 0x0c |      | padding
+0x20   |      |      | end
+
+
+===== ShaderParam =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+0x00   | 0x08 |                             | callback pointer
+0x08   | 0x08 | nn::util::ResString*        | name offset
+0x10   | 0x01 | u8                          | shader param type
+0x11   | 0x01 | u8                          | data size
+0x12   | 0x02 | u16                         | data offset
+0x14   | 0x04 | s32                         | uniform variable offset
+0x18   | 0x02 | u16                         | depended index
+0x1a   | 0x02 | u16                         | depend index
+0x1c   | 0x04 |                             | padding
+0x20   |      |                             | end
+
+
+===== nn::g3d::ResSkeletalAnim =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | base header (signature 'FSKA')
+0x10   | 0x08 | nn::util::ResString*        | name offset
+0x18   | 0x08 | nn::util::ResString*        | path offset
+0x20   | 0x08 | nn::g3d::ResSkeleton*       | bind skeleton offset
+0x28   | 0x08 | u16*                        | bind index array offset
+0x30   | 0x08 | BoneAnim*                   | bone animation array offset
+0x38   | 0x08 | UserData*                   | user data array offset
+0x40   | 0x08 | nn::util::ResDic*           | user data dict offset
+0x48   | 0x04 | u32                         | flags
+0x4c   | 0x04 | s32?                        | frame count
+0x50   | 0x04 | s32?                        | curve count
+0x54   | 0x04 | u32                         | baked size
+0x58   | 0x02 | u16                         | bone animation count
+0x5a   | 0x02 | u16                         | user data count
+0x5c   | 0x04 |                             | padding
+0x60   |      |                             | end
+
+
+===== nn::gfx::BufferInfo =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x04 | u32  | buffer size
+0x04   | 0x04 | u32  | flags
+0x08   | 0x08 |      | padding?
+0x10   |      |      | end
+
+
+===== BufferSize =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x04 | u32  | size
+0x04   | 0x04 | u32  | flags
+0x08   | 0x28 |      | padding
+0x30   |      |      | end
+
+
+===== nn::gfx::MemoryPoolInfo =====
+
+offset | size | type  | description
+-------+------+-------+-----------------
+0x00   | 0x04 | u32   | flags
+0x04   | 0x04 | u32   | size
+0x08   | 0x08 | void* | memory pointer
+0x10   |      |       | end
+
+
+===== nn::gfx::TMemoryPool =====
+
+offset | size  | type      | description
+-------+-------+-----------+----------------
+0x000  | 0x120 | u8[0x120] | runtime array 
+0x120  |       |           | end
+
+
+===== nn::util::ResDic =====
+
+offset | size | type                 | description
+-------+------+----------------------+----------------------------------
+0x00   | 0x04 | char[4]              | signature (blank. '\0\0\0\0')
+0x04   | 0x04 | u32                  | node count excluding root node
+0x08   |      | ResDic::ResDicNode[] | root node first, null key
+0x08 + 0x10 * (node count + 1)       | end       
+
+
+===== nn::util::ResDic::ResDicNode =====
+
+offset | size | type    | description
+-------+------+---------+------------------------------------------------------------------------
+0x00   | 0x04 | s32     | reference bits (bit 0-2 = right shift, bit 2-31 = length) (-1 for root)
+0x04   | 0x02 | u16     | left child index
+0x06   | 0x02 | u16     | right child index
+0x08   | 0x08 | char*   | offset to key in string table
+0x10   |      |         | end
+
+
+===== nn::util::ResString =====
+
+offset        | size   | type   | description
+--------------+--------+--------+--------------
+0x00          | 0x02   | u16    | length
+0x02          | length | char[] | characters
+0x02 + length |        |        | end
+
+
+===== nn::util::BinaryBlockHeader =====
+
+offset | size | type    | description
+-------+------+---------+---------------------------------------------------
+0x00   | 0x04 | char[4] | signature
+0x04   | 0x04 | u32     | offset of next block relative to this block(?)
+0x08   | 0x04 | u32     | block size
+0x0c   | 0x04 |         | padding
+0x10   |      |         | end
+
+
+===== nn::util::BinaryFileHeader =====
+
+offset | size | type    | description
+-------+------+---------+-----------------------------------------------------------
+0x00   | 0x08 | char[8] | signature
+0x08   | 0x04 | u32     | version number (u8 patch version number, u8 minor version number, u16 major version number) (8.0.0 for odyssey)
+0x0c   | 0x02 | u16     | byte order mark (0xFEFF for big endian, 0xFFFE for little endian)
+0x0e   | 0x01 | u8      | alignment (actual alignment = 1 << this value)
+0x0f   | 0x01 | u8      | target address size
+0x10   | 0x04 | u32     | offset of filename string relative to this header
+0x14   | 0x02 | u16     | is relocated
+0x16   | 0x02 | u16     | offset of first block relative to this header
+0x18   | 0x04 | u32     | offset of relocation table relative to this header
+0x1c   | 0x04 | u32     | file size
+0x20   |      |         | end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===== HEADER =====
+
+      0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+0x00 |           signature           |    version    |  bom  |aln|tgt|
+     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+0x10 |   filename    |is_rloc| block |  reloc table  |   file size   |
+     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+0x20 |        filename length        |          FMDL offset          |
+     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+0x30 |       FMDL dict offset        |                               |
+     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+
+
