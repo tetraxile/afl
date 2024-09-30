@@ -1,0 +1,94 @@
+BNTX version 4.0.0
+
+
+===== nn::gfx::ResTextureFile =====
+
+offset | size | type                         | description
+-------+------+------------------------------+------------------------
+0x00   | 0x20 | nn::util::BinaryFileHeader   | header (magic "BNTX")
+0x20   | 0x28 | nn::gfx::ResTextureContainer | texture header
+
+
+===== nn::util::BinaryFileHeader =====
+
+offset | size | type    | description
+-------+------+---------+-----------------------------------------------------------
+0x00   | 0x08 | char[8] | signature
+0x08   | 0x04 | u32     | version number (u8 patch version number, u8 minor version number, u16 major version number) (8.0.0 for odyssey)
+0x0c   | 0x02 | u16     | byte order mark (0xFEFF for big endian, 0xFFFE for little endian)
+0x0e   | 0x01 | u8      | alignment (actual alignment = 1 << this value)
+0x0f   | 0x01 | u8      | target address size
+0x10   | 0x04 | u32     | offset of filename string relative to this header
+0x14   | 0x02 | u16     | is relocated
+0x16   | 0x02 | u16     | offset of first block relative to this header
+0x18   | 0x04 | u32     | offset of relocation table relative to this header
+0x1c   | 0x04 | u32     | file size
+0x20   |      |         | end
+
+
+===== nn::gfx::ResTextureContainer =====
+
+offset | size | type                      | description
+-------+------+---------------------------+------------------------------
+0x00   | 0x04 | char[4]                   | signature "NX  " (2 spaces)
+0x04   | 0x04 | u32                       | texture count
+0x08   | 0x08 | nn::gfx::ResTextureInfo** | texture info array
+0x10   | 0x08 | nn::gfx::ResTextureData*  | texture data header
+0x18   | 0x08 | nn::util::ResDic*         | texture info dictionary
+0x20   | 0x08 | nn::gfx::TMemoryPool*     | 
+0x28   | 0x08 | nn::gfx::TMemoryPool*     | 
+0x30   | 0x04 | s32                       | base memory pool offset
+0x34   | 0x04 |                           | reserved
+0x38   |      |                           | 
+
+
+===== nn::gfx::ResTextureInfo =====
+
+offset | size | type                          | description
+-------+------+-------------------------------+---------------------------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader   | header (magic "BRTI")
+0x10   | 0x28 | nn::gfx::TextureInfo          | texture info
+0x38   | 0x18 |                               | reserved
+0x50   | 0x04 | u32                           | total texture size (including all mipmaps)
+0x54   | 0x04 | u32                           | texture data alignment
+0x58   | 0x04 | nn::gfx::ChannelSource[4]     | 
+0x5c   | 0x01 | nn::gfx::ImageDimension       | 
+0x5d   | 0x03 |                               | reserved
+0x60   | 0x08 | length-prefixed string        | texture name
+0x68   | 0x08 | nn::gfx::ResTextureContainer* | parent texture container
+0x70   | 0x08 | void**                        | array of pointers to each mipmap
+0x78   | 0x08 |                               | user data array
+0x80   | 0x08 | nn::gfx::TTexture*            | 
+0x88   | 0x08 | nn::gfx::TTextureView*        | 
+0x90   | 0x08 | nn::gfx::DescriptorSlot       | 
+0x98   | 0x08 | nn::util::ResDic*             | user data dict
+0xa0   |      |                               | 
+
+
+===== nn::gfx::TextureInfo =====
+
+offset | size | type                           | description
+-------+------+--------------------------------+--------------------
+0x00   | 0x01 | u8                             | flags
+0x01   | 0x01 | nn::gfx::ImageStorageDimension | storage dimension
+0x02   | 0x02 | nn::gfx::TileMode              | tile mode
+0x04   | 0x02 | u16                            | swizzle
+0x06   | 0x02 | u16                            | mip levels
+0x08   | 0x02 | u16                            | sample count
+0x0a   | 0x02 |                                | 
+0x0c   | 0x04 | nn::gfx::ImageFormat           | image format
+0x10   | 0x04 | nn::gfx::GpuAccess             | gpu access flags
+0x14   | 0x04 | u32                            | width
+0x18   | 0x04 | u32                            | height
+0x1c   | 0x04 | u32                            | depth
+0x20   | 0x04 | u32                            | array layers
+0x24   | 0x04 |                                | 
+0x28   |      |                                | 
+
+
+===== nn::gfx::ResTextureData =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+------------------------
+0x00   | 0x10 | nn::util::BinaryBlockHeader | header (magic "BRTD")
+0x10   |      | u8[]                        | texture data

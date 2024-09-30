@@ -1,0 +1,167 @@
+BFFNT version 4.1.0
+
+
+===== nn::font::detail::BinaryFileHeader =====
+
+offset | size | type    | description
+-------+------+---------+---------------------------------------------------------------------------
+0x00   | 0x04 | char[4] | signature "FFNT"
+0x04   | 0x02 | u16     | byte order mark (0xFEFF for big endian, 0xFFFE for little endian)
+0x06   | 0x02 | u16     | header size (0x14)
+0x08   | 0x04 | u32     | version (u16 patch version number, u8 minor, u8 major) (4.1.0 for odyssey)
+0x0c   | 0x04 | u32     | file size
+0x10   | 0x02 | u16     | section count
+0x12   | 0x02 | u16     | reserved
+
+
+===== block header =====
+
+offset | size | type    | description
+-------+------+---------+--------------
+0x00   | 0x04 | char[4] | signature
+0x04   | 0x04 | u32     | block size
+
+
+===== font info =====
+
+offset | size | type                      | description
+-------+------+---------------------------+----------------------------------
+0x00   | 0x00 |                           | block header (signature "FINF")
+0x08   | 0x18 | nn::font::FontInformation | inner type
+0x20   |      |                           | 
+
+
+===== nn::font::FontInformation =====
+
+offset | size | type                | description
+-------+------+---------------------+---------------------------------------------------------
+0x00   | 0x01 | u8                  | font type (0: glyph, 1: texture, 2: packed texture)
+0x01   | 0x01 | u8                  | height
+0x02   | 0x01 | u8                  | width
+0x03   | 0x01 | u8                  | ascent
+0x04   | 0x02 | u16                 | line feed
+0x06   | 0x02 | u16                 | alternate character index
+0x08   | 0x03 | nn::font::FontWidth | default character widths
+0x0b   | 0x01 | u8                  | character encoding (0: utf-16, 1: shift JIS, 2: CP1252)
+0x0c   | 0x04 | u32                 | TGLP offset
+0x10   | 0x04 | u32                 | CWDH offset
+0x14   | 0x04 | u32                 | CMAP offset
+0x18   |      |                     | 
+
+
+===== nn::font::FontWidth =====
+
+offset | size | type | description
+-------+------+------+------------------
+0x00   | 0x01 | u8   | left width
+0x01   | 0x01 | u8   | glyph width
+0x02   | 0x01 | u8   | character width
+0x03   |      |      | 
+
+
+===== texture glyph =====
+
+offset | size | type                | description
+-------+------+---------------------+----------------------------------
+0x00   | 0x08 | block header        | block header (signature "TGLP")
+0x08   | 0x18 | texture glyph inner | inner type
+0x20   |      |                     | 
+
+
+===== texture glyph inner =====
+
+offset | size | type | description
+-------+------+------+---------------------------
+0x00   | 0x01 | u8   | cell width
+0x01   | 0x01 | u8   | cell height
+0x02   | 0x01 | u8   | texture count / active sheet count
+0x03   | 0x01 | u8   | max character width
+0x04   | 0x04 | u32  | per texture size
+0x08   | 0x02 | u16  | baseline position
+0x0a   | 0x02 | u16  | texture format
+0x0c   | 0x02 | u16  | cells per row
+0x0e   | 0x02 | u16  | cells per column
+0x10   | 0x02 | u16  | image width
+0x12   | 0x02 | u16  | image height
+0x14   | 0x04 | u32  | image data offset (bntx)
+0x18   |      |      | 
+
+
+
+===== character width table =====
+
+offset | size | type                        | description
+-------+------+-----------------------------+----------------------------------
+0x00   | 0x08 | block header                | block header (signature "CWDH")
+0x08   | 0x08 | character width table inner | inner type
+0x10   |      |                             | 
+
+
+===== character width table inner =====
+
+offset | size | type                  | description
+-------+------+-----------------------+--------------------
+0x00   | 0x02 | u16                   | first entry index
+0x02   | 0x02 | u16                   | last entry index
+0x04   | 0x04 | u32                   | next CWDH offset
+0x08   |      | nn::font::FontWidth[] | character widths
+
+
+===== character map =====
+
+offset | size | type                | description
+-------+------+---------------------+----------------------------------
+0x00   | 0x08 | block header        | block header (signature "CMAP")
+0x08   |      | character map inner | inner type
+       |      |                     | 
+
+
+===== character map inner =====
+
+offset | size | type | description
+-------+------+------+--------------------------------------------
+0x00   | 0x04 | u32  | character code range begin
+0x04   | 0x04 | u32  | character code range end
+0x08   | 0x02 | u16  | map method (0: direct, 1: table, 2: scan)
+0x0a   | 0x02 | u16  | reserved
+0x0c   | 0x04 | u32  | next CMAP offset
+0x10   |      |      | character map
+
+
+===== character map direct =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x02 | u16  | character
+
+
+===== character map table =====
+
+offset | size         | type  | description
+-------+--------------+-------+--------------
+0x00   | 0x02 * range | u16[] | character
+
+
+===== character map scan =====
+
+offset | size         | type    | description
+-------+--------------+---------+-------------------
+0x00   | 0x02         | u16     | scan half count
+0x02   | 0x02         | u16     | reserved
+0x04   | 0x08 * range | entry[] | scan entry array
+
+
+===== scan entry =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x04 | u32  | key
+0x04   | 0x04 | u32  | code
+0x08   |      |      | 
+
+
+===== nn::font::FontKerningTable =====
+
+offset | size | type | description
+-------+------+------+-------------
+0x00   |      |      | 
