@@ -3,43 +3,76 @@
 
 #include "types.h"
 
-#include <cstdio>
-#include <cstring>
-#include <fstream>
-#include <iterator>
+#include <filesystem>
+#include <string>
+#include <variant>
 #include <vector>
+
+namespace fs = std::filesystem;
+
+typedef s32 result_t;
+
+enum Error : result_t {
+	BadSignature = 1,
+	BadByteOrder,
+	FileError,
+};
+
+constexpr const char* result_to_string(result_t r) {
+	switch (r) {
+		case Error::BadSignature: return "bad signature";
+		case Error::BadByteOrder: return "invalid byte order";
+		case Error::FileError: return "file error";
+	}
+	return "(unknown)";
+}
 
 namespace util {
 
-bool isEqual(const char* str1, const char* str2) {
-	return std::strcmp(str1, str2) == 0;
-}
+enum class ByteOrder {
+	Big,
+	Little,
+};
 
-s32 readFile(const char* filename, std::vector<u8>& contents) {
-	std::ifstream fstream(filename, std::ios::binary);
+class BinaryReader {
+public:
+	BinaryReader(BinaryReader& a) : mBuffer(a.mBuffer){}
+	BinaryReader(const std::vector<u8>& buffer) : mBuffer(buffer){}
 
-	if (fstream.eof() || fstream.fail()) {
-		fprintf(stderr, "error: couldn't open file\n");
-		return 1;
-	}
+	u8 read_u8();
+	u16 read_u16();
+	u32 read_u24();
+	u32 read_u32();
+	u64 read_u64();
+	result_t check_signature(const char* expected, size_t length);
+	result_t read_byte_order(u16 expected_be = 0xfeff);
+	std::vector<u8> read_bytes(size_t size);
+	std::string read_string();
 
-	// disable skipping whitespace in binary file
-	fstream.unsetf(std::ios::skipws);
+	void seek(size_t offset);
+	void seek_rel(size_t offset);
 
-	fstream.seekg(0, std::ios_base::end);
-	std::streampos fileSize = fstream.tellg();
-	fstream.seekg(0, std::ios_base::beg);
+	size_t pos() const { return mCursor; }
 
-	contents.reserve(fileSize);
-	contents.insert(contents.begin(),
-				    std::istream_iterator<u8>(fstream),
-				    std::istream_iterator<u8>());
+private:
+	const std::vector<u8>& mBuffer;
+	size_t mCursor = 0;
+	ByteOrder mByteOrder = ByteOrder::Big;
+};
 
-	fstream.close();
+u16 bswap16(u16 value);
+u32 bswap32(u32 value);
 
-	return 0;
-}
+u16 read_u16_be(const std::vector<u8>& buffer, size_t offset);
+u32 read_u32_be(const std::vector<u8>& buffer, size_t offset);
+u32 read_u32_le(const std::vector<u8>& buffer, size_t offset);
 
+void write_u16_be(std::vector<u8>& buffer, size_t offset, u16 value);
+void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value);
+
+bool is_equal(std::string str1, std::string str2);
+s32 read_file(const fs::path& filename, std::vector<u8>& contents);
+void write_file(const fs::path& filename, const std::vector<u8>& contents);
 }
 
 #endif
