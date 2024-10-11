@@ -27,11 +27,11 @@ s32 main(s32 argc, char* argv[]) {
 	}
 	
 	Format format;
-	if (util::isEqual(argv[1], "yaz0"))
+	if (util::is_equal(argv[1], "yaz0"))
 		format = Format::Yaz0;
-	else if (util::isEqual(argv[1], "sarc"))
+	else if (util::is_equal(argv[1], "sarc"))
 		format = Format::SARC;
-	else if (util::isEqual(argv[1], "szs"))
+	else if (util::is_equal(argv[1], "szs"))
 		format = Format::SZS;
 	else {
 		fprintf(stderr, "error: unrecognized format '%s'\n", argv[1]);
@@ -39,9 +39,9 @@ s32 main(s32 argc, char* argv[]) {
 	}
 
 	Option option;
-	if (util::isEqual(argv[2], "read") || util::isEqual(argv[2], "r"))
+	if (util::is_equal(argv[2], "read") || util::is_equal(argv[2], "r"))
 		option = Option::Read;
-	else if (util::isEqual(argv[2], "write") || util::isEqual(argv[2], "w"))
+	else if (util::is_equal(argv[2], "write") || util::is_equal(argv[2], "w"))
 		option = Option::Write;
 	else {
 		fprintf(stderr, "error: unrecognized option '%s'\n", argv[2]);
@@ -49,17 +49,17 @@ s32 main(s32 argc, char* argv[]) {
 	}
 
 	if (false) {
-		std::string base_path = "/home/tetra/nx/smo/100/romfs/";
+		fs::path base_path = "/home/tetra/nx/smo/100/romfs/";
 		for (const auto& dir : fs::directory_iterator(base_path)) {
-			const char* dir_name = dir.path().filename().c_str();
-			for (const auto& file_path : fs::directory_iterator(dir)) {
-				if (!file_path.path().string().ends_with(".szs")) continue;
-				const char* file_name = file_path.path().filename().c_str();
-				printf("%s\n", file_path.path().c_str());
+			fs::path dir_name = dir.path().filename();
+			for (const fs::path& file_path : fs::directory_iterator(dir)) {
+				if (!file_path.string().ends_with(".szs")) continue;
+				const char* file_name = file_path.filename().c_str();
+				printf("%s\n", file_path.c_str());
 
 				printf("read\n");
 				std::vector<u8> contents;
-				s32 r = util::readFile(file_path.path().c_str(), contents);
+				s32 r = util::read_file(file_path, contents);
 				if (r != 0) return r;
 				u32 comp_size = contents.size();
 
@@ -86,6 +86,7 @@ s32 main(s32 argc, char* argv[]) {
 	}
 
 
+	result_t r;
 
 	switch (format) {
 	case Format::Yaz0:
@@ -96,12 +97,12 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			s32 r = util::readFile(argv[3], fileContents);
-			if (r != 0) return r;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
 
 			std::vector<u8> outputBuffer;
 			r = yaz0::decompress(fileContents, outputBuffer);
-			if (r != 0) return r;
+			if (r) break;
 
 			std::ofstream outfile(argv[4], std::ios::out | std::ios::binary);
 			outfile.write(reinterpret_cast<const char*>(outputBuffer.data()), outputBuffer.size());
@@ -115,33 +116,63 @@ s32 main(s32 argc, char* argv[]) {
 			u32 alignment = argc > 5 ? atoi(argv[5]) : 0x80;
 
 			std::vector<u8> fileContents;
-			s32 r = util::readFile(argv[3], fileContents);
-			if (r != 0) return r;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
 
 			std::vector<u8> outputBuffer;
 			yaz0::compress(fileContents, outputBuffer, alignment);
 
-			std::ofstream outfile(argv[4], std::ios::out | std::ios::binary);
-			outfile.write(reinterpret_cast<const char*>(outputBuffer.data()), outputBuffer.size());
+			util::write_file(argv[4], outputBuffer);
 		}
-
 
 		break;
 	case Format::SARC:
-		if (argc < 4) {
-			fprintf(stderr, "usage: %s sarc <archive> <output dir>\n", argv[0]);
-			return 1;
+		if (option == Option::Read) {
+			if (argc < 5) {
+				fprintf(stderr, "usage: %s sarc r <archive> <output dir>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
+
+			SARC sarc(fileContents);
+			r = sarc.read();
+			if (r) break;
+
+			r = sarc.save(argv[4]);
+			if (r) break;
 		}
 
 		break;
 	case Format::SZS:
-		if (argc < 4) {
-			fprintf(stderr, "usage: %s szs <archive> <output dir>\n", argv[0]);
-			return 1;
+		if (option == Option::Read) {
+			if (argc < 5) {
+				fprintf(stderr, "usage: %s szs r <archive> <output dir>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
+
+			std::vector<u8> decompressed;
+			r = yaz0::decompress(fileContents, decompressed);
+			if (r) break;
+
+			SARC sarc(decompressed);
+			r = sarc.read();
+			if (r) break;
+
+			r = sarc.save(argv[4]);
+			if (r) break;
 		}
 
 		break;
 	}
+
+	if (r) fprintf(stderr, "error: %s\n", result_to_string(r));
 
 	return 0;
 }
