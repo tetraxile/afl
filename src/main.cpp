@@ -1,16 +1,20 @@
 #include "util.h"
 #include "yaz0.h"
+#include "bffnt.h"
+#include "bntx.h"
+#include "byml.h"
+#include "sarc.h"
 
 #include <cstdio>
 #include <fstream>
-
-#include <filesystem>
-namespace fs = std::filesystem;
 
 enum class Format {
 	Yaz0,
 	SARC,
 	SZS,
+	BFFNT,
+	BNTX,
+	BYML,
 };
 
 enum class Option {
@@ -21,7 +25,7 @@ enum class Option {
 s32 main(s32 argc, char* argv[]) {
 	if (argc < 3) {
 		fprintf(stderr, "usage: %s <format> <option>\n", argv[0]);
-		fprintf(stderr, "\tformats: yaz0, sarc, szs\n");
+		fprintf(stderr, "\tformats: yaz0, sarc, szs, bffnt, bntx, byml\n");
 		fprintf(stderr, "\toptions: read, r, write, w\n");
 		return 1;
 	}
@@ -33,6 +37,12 @@ s32 main(s32 argc, char* argv[]) {
 		format = Format::SARC;
 	else if (util::is_equal(argv[1], "szs"))
 		format = Format::SZS;
+	else if (util::is_equal(argv[1], "bffnt"))
+		format = Format::BFFNT;
+	else if (util::is_equal(argv[1], "bntx"))
+		format = Format::BNTX;
+	else if (util::is_equal(argv[1], "byml"))
+		format = Format::BYML;
 	else {
 		fprintf(stderr, "error: unrecognized format '%s'\n", argv[1]);
 		return 1;
@@ -167,12 +177,103 @@ s32 main(s32 argc, char* argv[]) {
 
 			r = sarc.save(argv[4]);
 			if (r) break;
+		}	
+
+		break;
+	case Format::BFFNT:
+		if (option == Option::Read) {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s bffnt r <font file>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
+
+			BFFNT bffnt(fileContents);
+			r = bffnt.read();
+			if (r) break;
+		}
+		
+		break;
+	case Format::BNTX:
+		if (option == Option::Read) {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s bntx r <texture file>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
+
+			BNTX bntx(fileContents);
+			r = bntx.read();
+			if (r) break;
+		}
+
+		break;
+	case Format::BYML:
+		if (option == Option::Read) {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s byml r <input file>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(argv[3], fileContents);
+			if (r) break;
+
+			BYML byml;
+			r = byml.init(&fileContents[0]);
+			if (r) break;
+			
+			printf("\nroot type: %x\n", byml.get_type());
+			printf("root size: %d\n", byml.get_size());
+			
+			for (s32 scenarioIdx = 0; scenarioIdx < byml.get_size(); scenarioIdx++) {
+				BYML scenario;
+				r = byml.get_container_by_idx(&scenario, scenarioIdx);
+				if (r) break;
+
+				printf("\tscenario type: %x\n", scenario.get_type());
+				printf("\tscenario size: %d\n", scenario.get_size());
+
+				if (!scenario.has_key("ObjectList")) {
+					printf("\n");
+					continue;
+				}
+
+				BYML objectList;
+				r = scenario.get_container_by_key(&objectList, "ObjectList");
+				if (r) break;
+
+				printf("\t\tobject list type: %x\n", objectList.get_type());
+				printf("\t\tobject list size: %d\n", objectList.get_size());
+
+				for (s32 objectIdx = 0; objectIdx < objectList.get_size(); objectIdx++) {
+					BYML object;
+					r = objectList.get_container_by_idx(&object, objectIdx);
+					if (r) break;
+
+					std::string name;
+					r = object.get_string_by_key(&name, "UnitConfigName");
+					if (r) break;
+
+					printf("\t\t\tobject name: %s\n", name.c_str());
+				}
+				if (r) break;
+
+				printf("\n");
+			}
+			if (r) break;
 		}
 
 		break;
 	}
 
-	if (r) fprintf(stderr, "error: %s\n", result_to_string(r));
+	if (r) fprintf(stderr, "error %x: %s\n", r, result_to_string(r));
 
 	return 0;
 }
