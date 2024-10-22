@@ -89,6 +89,18 @@ bool BYML::has_key(const std::string& key) const {
 	return false;
 }
 
+result_t BYML::get_type_by_idx(NodeType* type, u32 idx) const {
+	// TODO: allow indexing hash nodes by index?
+	if (get_type() != NodeType::Array)
+		return Error::WrongNodeType;
+
+	if (idx >= get_size())
+		return Error::OutOfBounds;
+
+	*type = (NodeType)reader::read_u8(mOffset + 4 + idx);
+	return 0;
+}
+
 result_t BYML::get_container_by_idx(BYML* container, u32 idx) const {
 	// TODO: allow indexing hash nodes by index?
 	if (get_type() != NodeType::Array)
@@ -206,9 +218,24 @@ result_t BYML::get_u64_by_idx(u64* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_container_by_key(BYML* container, const std::string& key) const {
-	const u8* offset;
+result_t BYML::get_type_by_key(NodeType* type, const std::string& key) const {
+	if (get_type() != NodeType::Hash)
+		return Error::WrongNodeType;
 
+	// TODO: implement binary search
+	for (u32 i = 0; i < get_size(); i++) {
+		const u8* childOffset = mOffset + 4 + i*8;
+		u32 keyIdx = reader::read_u24(childOffset, mHeader.mByteOrder);
+		if (util::is_equal(key, get_hash_string(keyIdx))) {
+			*type = (NodeType)reader::read_u8(childOffset + 3);
+			return 0;
+		}
+	}
+
+	return Error::InvalidKey;
+}
+
+result_t BYML::get_container_by_key(BYML* container, const std::string& key) const {
 	if (get_type() != NodeType::Hash)
 		return Error::WrongNodeType;
 

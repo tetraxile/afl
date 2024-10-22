@@ -45,6 +45,9 @@ public:
 	u32 get_size() const;
 	bool has_key(const std::string& key) const;
 
+	result_t get_type_by_idx(NodeType* type, u32 idx) const;
+	result_t get_type_by_key(NodeType* type, const std::string& key) const;
+
 	result_t get_container_by_idx(BYML* container, u32 idx) const;
 	result_t get_string_by_idx(std::string* out, u32 idx) const;
 	result_t get_bool_by_idx(bool* out, u32 idx) const;
