@@ -170,7 +170,7 @@ result_t BYML::get_bool_by_idx(bool* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::Bool)
 		return Error::WrongNodeType;
 
 	// note: treats non-boolean values (i.e. values that are not 0 or 1) as true
@@ -190,7 +190,7 @@ result_t BYML::get_s32_by_idx(s32* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::S32)
 		return Error::WrongNodeType;
 
 	*out = reader::read_s32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
@@ -208,7 +208,7 @@ result_t BYML::get_f32_by_idx(f32* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::F32)
 		return Error::WrongNodeType;
 
 	*out = reader::read_f32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
@@ -226,7 +226,7 @@ result_t BYML::get_u32_by_idx(u32* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::U32)
 		return Error::WrongNodeType;
 
 	*out = reader::read_u32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
@@ -244,7 +244,7 @@ result_t BYML::get_s64_by_idx(s64* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::S64)
 		return Error::WrongNodeType;
 
 	u32 value = reader::read_u32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
@@ -263,7 +263,7 @@ result_t BYML::get_f64_by_idx(f64* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::F64)
 		return Error::WrongNodeType;
 
 	u32 value = reader::read_u32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
@@ -282,7 +282,7 @@ result_t BYML::get_u64_by_idx(u64* out, u32 idx) const {
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
 	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
-	if (childType != NodeType::String)
+	if (childType != NodeType::U64)
 		return Error::WrongNodeType;
 
 	u32 value = reader::read_u32(mOffset + valuesOffset + 4*idx, mHeader.mByteOrder);
