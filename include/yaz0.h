@@ -62,6 +62,8 @@
 
 #include <vector>
 
+#include "types.h"
+
 namespace yaz0 {
 s32 decompress(const std::vector<u8>& input, std::vector<u8>& output);
 void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignment);

@@ -5,76 +5,78 @@
 
 #include "util.h"
 
-result_t BFFNT::read_header() {
+result_t BFFNT::read_header(const u8* offset) {
 	result_t r;
-	r = mReader.check_signature("FFNT", 4);
+	r = reader::check_signature(offset, "FFNT", 4);
 	if (r) return r;
 
-	mReader.read_byte_order();
-	u16 headerSize = mReader.read_u16();
-	u32 version = mReader.read_u32();
-	u32 fileSize = mReader.read_u32();
-	u16 sectionCount = mReader.read_u16();
-	mReader.seek_rel(2);
+	r = reader::read_byte_order(&mByteOrder, offset + 4, 0xFEFF);
+	if (r) return r;
+
+	u16 headerSize = reader::read_u16(offset + 6, mByteOrder);
+	u32 version = reader::read_u32(offset + 8, mByteOrder);
+	u32 fileSize = reader::read_u32(offset + 0xc, mByteOrder);
+	u16 sectionCount = reader::read_u16(offset + 0x10, mByteOrder);
 
 	return 0;
 }
 
-result_t BFFNT::read_finf() {
+result_t BFFNT::read_finf(const u8* offset) {
 	result_t r;
-	r = mReader.check_signature("FINF", 4);
+	r = reader::check_signature(offset, "FINF", 4);
 	if (r) return r;
 
-	u32 blockSize = mReader.read_u32();
-	mFontInfo.mFontType = mReader.read_u8();
-	mFontInfo.mHeight = mReader.read_u8();
-	mFontInfo.mWidth = mReader.read_u8();
-	mFontInfo.mAscent = mReader.read_u8();
-	mFontInfo.mLineFeed = mReader.read_u16();
-	mFontInfo.mAlternateCharIndex = mReader.read_u16();
-	mFontInfo.mDefaultCharWidth.mLeftWidth = mReader.read_u8();
-	mFontInfo.mDefaultCharWidth.mGlyphWidth = mReader.read_u8();
-	mFontInfo.mDefaultCharWidth.mCharWidth = mReader.read_u8();
-	mFontInfo.mEncoding = mReader.read_u8();
-	mFontInfo.mTGLPOffset = mReader.read_u32();
-	mFontInfo.mCWDHOffset = mReader.read_u32();
-	mFontInfo.mCMAPOffset = mReader.read_u32();
+	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
+	const u8* blockOffset = offset + 8;
+	mFontInfo.mFontType = reader::read_u8(blockOffset, mByteOrder);
+	mFontInfo.mHeight = reader::read_u8(blockOffset + 1, mByteOrder);
+	mFontInfo.mWidth = reader::read_u8(blockOffset + 2, mByteOrder);
+	mFontInfo.mAscent = reader::read_u8(blockOffset + 3, mByteOrder);
+	mFontInfo.mLineFeed = reader::read_u16(blockOffset + 4, mByteOrder);
+	mFontInfo.mAlternateCharIndex = reader::read_u16(blockOffset + 6, mByteOrder);
+	mFontInfo.mDefaultCharWidth.mLeftWidth = reader::read_u8(blockOffset + 8, mByteOrder);
+	mFontInfo.mDefaultCharWidth.mGlyphWidth = reader::read_u8(blockOffset + 9, mByteOrder);
+	mFontInfo.mDefaultCharWidth.mCharWidth = reader::read_u8(blockOffset + 0xa, mByteOrder);
+	mFontInfo.mEncoding = reader::read_u8(blockOffset + 0xb, mByteOrder);
+	mFontInfo.mTGLPOffset = reader::read_u32(blockOffset + 0xc, mByteOrder);
+	mFontInfo.mCWDHOffset = reader::read_u32(blockOffset + 0x10, mByteOrder);
+	mFontInfo.mCMAPOffset = reader::read_u32(blockOffset + 0x14, mByteOrder);
 
 	// printf("block size: %x\n", blockSize);
-	// printf("font type: %x\n", fontType);
-	// printf("height: %x\n", height);
-	// printf("width: %x\n", width);
-	// printf("ascent: %x\n", ascent);
-	// printf("line feed: %x\n", lineFeed);
-	// printf("alt char index: %x\n", alternateCharIndex);
-	// printf("widths: %x %x %x\n", leftWidth, glyphWidth, charWidth);
-	// printf("encoding: %x\n", charEncoding);
-	// printf("TGLP: %x\n", tglpOffset);
-	// printf("CWDH: %x\n", cwdhOffset);
-	// printf("CMAP: %x\n", cmapOffset);
+	// printf("font type: %x\n", mFontInfo.mFontType);
+	// printf("height: %x\n", mFontInfo.mHeight);
+	// printf("width: %x\n", mFontInfo.mWidth);
+	// printf("ascent: %x\n", mFontInfo.mAscent);
+	// printf("line feed: %x\n", mFontInfo.mLineFeed);
+	// printf("alt char index: %x\n", mFontInfo.mAlternateCharIndex);
+	// printf("widths: %x %x %x\n", mFontInfo.mDefaultCharWidth.mLeftWidth, mFontInfo.mDefaultCharWidth.mGlyphWidth, mFontInfo.mDefaultCharWidth.mCharWidth);
+	// printf("encoding: %x\n", mFontInfo.mEncoding);
+	// printf("TGLP: %x\n", mFontInfo.mTGLPOffset);
+	// printf("CWDH: %x\n", mFontInfo.mCWDHOffset);
+	// printf("CMAP: %x\n", mFontInfo.mCMAPOffset);
 	
 	return 0;
 }
 
-result_t BFFNT::read_tglp(u32 offset) {
+result_t BFFNT::read_tglp(const u8* offset) {
 	result_t r;
-	mReader.seek(offset - 8);
-	r = mReader.check_signature("TGLP", 4);
+	r = reader::check_signature(offset, "TGLP", 4);
 	if (r) return r;
 	
-	u32 blockSize = mReader.read_u32();
-	mTexGlyph.mCellWidth = mReader.read_u8();
-	mTexGlyph.mCellHeight = mReader.read_u8();
-	mTexGlyph.mTexCount = mReader.read_u8();
-	mTexGlyph.mMaxCharWidth = mReader.read_u8();
-	mTexGlyph.mPerTexSize = mReader.read_u32();
-	mTexGlyph.mBaselinePos = mReader.read_u16();
-	mTexGlyph.mTexFormat = mReader.read_u16();
-	mTexGlyph.mCellsPerRow = mReader.read_u16();
-	mTexGlyph.mCellsPerCol = mReader.read_u16();
-	mTexGlyph.mImageWidth = mReader.read_u16();
-	mTexGlyph.mImageHeight = mReader.read_u16();
-	mTexGlyph.mImageDataOffset = mReader.read_u32();
+	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
+	const u8* blockOffset = offset + 8;
+	mTexGlyph.mCellWidth = reader::read_u8(blockOffset, mByteOrder);
+	mTexGlyph.mCellHeight = reader::read_u8(blockOffset + 1, mByteOrder);
+	mTexGlyph.mTexCount = reader::read_u8(blockOffset + 2, mByteOrder);
+	mTexGlyph.mMaxCharWidth = reader::read_u8(blockOffset + 3, mByteOrder);
+	mTexGlyph.mPerTexSize = reader::read_u32(blockOffset + 4, mByteOrder);
+	mTexGlyph.mBaselinePos = reader::read_u16(blockOffset + 8, mByteOrder);
+	mTexGlyph.mTexFormat = reader::read_u16(blockOffset + 0xa, mByteOrder);
+	mTexGlyph.mCellsPerRow = reader::read_u16(blockOffset + 0xc, mByteOrder);
+	mTexGlyph.mCellsPerCol = reader::read_u16(blockOffset + 0xe, mByteOrder);
+	mTexGlyph.mImageWidth = reader::read_u16(blockOffset + 0x10, mByteOrder);
+	mTexGlyph.mImageHeight = reader::read_u16(blockOffset + 0x12, mByteOrder);
+	mTexGlyph.mImageDataOffset = reader::read_u32(blockOffset + 0x14, mByteOrder);
 
 	// printf("block size: %x\n", blockSize);
 	// printf("cell dims: %x x %x\n", mTexGlyph.mCellWidth, mTexGlyph.mCellHeight);
@@ -90,32 +92,33 @@ result_t BFFNT::read_tglp(u32 offset) {
 	return 0;
 }
 
-result_t BFFNT::read_cwdh(BFFNT::CWDH* cwdh, u32 offset) {
+result_t BFFNT::read_cwdh(BFFNT::CWDH* cwdh, const u8* offset) {
 	assert(cwdh != nullptr);
 
 	result_t r;
-	mReader.seek(offset - 8);
-	r = mReader.check_signature("CWDH", 4);
+	r = reader::check_signature(offset, "CWDH", 4);
 	if (r) return r;
 
-	u32 blockSize = mReader.read_u32();
-	cwdh->mFirstEntryIdx = mReader.read_u16();
-	cwdh->mLastEntryIdx = mReader.read_u16();
-	cwdh->mNextCWDHOffset = mReader.read_u32();
+	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
+	const u8* blockOffset = offset + 8;
+	cwdh->mFirstEntryIdx = reader::read_u16(blockOffset, mByteOrder);
+	cwdh->mLastEntryIdx = reader::read_u16(blockOffset + 2, mByteOrder);
+	cwdh->mNextCWDHOffset = reader::read_u32(blockOffset + 4, mByteOrder);
 
 	std::vector<FontWidth> entries;
 	for (u16 i = cwdh->mFirstEntryIdx; i < cwdh->mLastEntryIdx; i++) {
 		FontWidth width;
-		width.mLeftWidth = mReader.read_u8();
-		width.mGlyphWidth = mReader.read_u8();
-		width.mCharWidth = mReader.read_u8();
+		const u8* widthOffset = blockOffset + 8 + 3*i;
+		width.mLeftWidth = reader::read_u8(widthOffset, mByteOrder);
+		width.mGlyphWidth = reader::read_u8(widthOffset + 1, mByteOrder);
+		width.mCharWidth = reader::read_u8(widthOffset + 2, mByteOrder);
 		entries.push_back(width);
 	}	
 
 	// printf("block size: %x\n", blockSize);
-	// printf("first entry idx: %x\n", firstEntryIdx);
-	// printf("last entry idx: %x\n", lastEntryIdx);
-	// printf("next CWDH offset: %x\n", nextCWDHOffset);
+	// printf("first entry idx: %x\n", cwdh->mFirstEntryIdx);
+	// printf("last entry idx: %x\n", cwdh->mLastEntryIdx);
+	// printf("next CWDH offset: %x\n", cwdh->mNextCWDHOffset);
 	//
 	// for (auto& width : entries) {
 	// 	printf("\tleft: %x, glyph: %x, char: %x\n", width.mLeftWidth, width.mGlyphWidth, width.mCharWidth);
@@ -124,47 +127,46 @@ result_t BFFNT::read_cwdh(BFFNT::CWDH* cwdh, u32 offset) {
 	return 0;
 }
 
-result_t BFFNT::read_cmap(BFFNT::CMAP* cmap, u32 offset) {
+result_t BFFNT::read_cmap(BFFNT::CMAP* cmap, const u8* offset) {
 	assert(cmap != nullptr);
 
 	result_t r;
-	mReader.seek(offset - 8);
-	r = mReader.check_signature("CMAP", 4);
+	r = reader::check_signature(offset, "CMAP", 4);
 	if (r) return r;
 
-	u32 blockSize = mReader.read_u32();
-	cmap->mRangeBegin = mReader.read_u32();
-	cmap->mRangeEnd = mReader.read_u32();
-	cmap->mMapMethod = mReader.read_u16();
-	mReader.seek_rel(2);
-	cmap->mNextCMAPOffset = mReader.read_u32();
+	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
+	const u8* blockOffset = offset + 8;
+	cmap->mRangeBegin = reader::read_u32(blockOffset, mByteOrder);
+	cmap->mRangeEnd = reader::read_u32(blockOffset + 4, mByteOrder);
+	cmap->mMapMethod = reader::read_u16(blockOffset + 8, mByteOrder);
+	// 2 bytes of padding
+	cmap->mNextCMAPOffset = reader::read_u32(blockOffset + 0xc, mByteOrder);
 
 
 	// printf("block size: %x\n", blockSize);
-	// printf("range begin: %x\n", rangeBegin);
-	// printf("range end: %x\n", rangeEnd);
-	// printf("map method: %x\n", mapMethod);
-	// printf("next CMAP offset: %x\n", nextCMAPOffset);
+	// printf("range begin: %x\n", cmap->mRangeBegin);
+	// printf("range end: %x\n", cmap->mRangeEnd);
+	// printf("map method: %x\n", cmap->mMapMethod);
+	// printf("next CMAP offset: %x\n", cmap->mNextCMAPOffset);
 
-
+	const u8* mapOffset = blockOffset + 0x10;
 	if (cmap->mMapMethod == 0) { // direct
-		u16 charCode = mReader.read_u16();
+		u16 charCode = reader::read_u16(mapOffset, mByteOrder);
 		// printf("\t%x\n", charCode);
 	} else if (cmap->mMapMethod == 1) { // table
 		std::vector<u16> range;
 		for (s32 i = cmap->mRangeBegin; i < cmap->mRangeEnd; i++) {
-			u16 charCode = mReader.read_u16();
+			u16 charCode = reader::read_u16(mapOffset + 2*i, mByteOrder);
 			range.push_back(charCode);
 		}
 		for (auto code : range) {
 			// printf("\t%x\n", code);
 		}
 	} else if (cmap->mMapMethod == 2) { // scan
-		u16 halfCount = mReader.read_u16();
-		mReader.seek_rel(2);
+		u16 halfCount = reader::read_u16(mapOffset, mByteOrder);
 		for (s32 i = 0; i < halfCount; i++) {
-			u32 key = mReader.read_u32();
-			u32 code = mReader.read_u32();
+			u32 key = reader::read_u32(mapOffset + 4 + 8*i, mByteOrder);
+			u32 code = reader::read_u32(mapOffset + 4 + 8*i + 4, mByteOrder);
 			// printf("\t%x -> %x\n", key, code);
 		}
 	}
@@ -175,38 +177,38 @@ result_t BFFNT::read_cmap(BFFNT::CMAP* cmap, u32 offset) {
 result_t BFFNT::read() {
 	result_t r;
 	// file header
-	r = read_header();
+	r = read_header(&mContents[0]);
 	if (r) return r;
 	
 	// font info
-	r = read_finf();
+	r = read_finf(&mContents[0x14]);
 	if (r) return r;
 
 	// texture glyph
-	r = read_tglp(mFontInfo.mTGLPOffset);
+	r = read_tglp(&mContents[0] + mFontInfo.mTGLPOffset - 8);
 	if (r) return r;
 
-	mReader.seek(mTexGlyph.mImageDataOffset);
-	std::vector<u8> imageData = mReader.read_bytes(mTexGlyph.mPerTexSize);
+	const u8* imageOffset = &mContents[0] + mTexGlyph.mImageDataOffset;
+	std::vector<u8> imageData = reader::read_bytes(imageOffset, mTexGlyph.mPerTexSize);
 
 	util::write_file("out.bntx", imageData);
 
 	// character width table
-	u32 nextOffset = mFontInfo.mCWDHOffset;
-	while (nextOffset != 0) {
+	const u8* nextOffset = &mContents[0] + mFontInfo.mCWDHOffset;
+	while (nextOffset - &mContents[0] != 0) {
 		CWDH cwdh;
-		r = read_cwdh(&cwdh, nextOffset);
+		r = read_cwdh(&cwdh, nextOffset - 8);
 		if (r) return r;
-		nextOffset = cwdh.mNextCWDHOffset;
+		nextOffset = &mContents[0] + cwdh.mNextCWDHOffset;
 	}
 
 	// character map
-	nextOffset = mFontInfo.mCMAPOffset;
-	while (nextOffset != 0) {
+	nextOffset = &mContents[0] + mFontInfo.mCMAPOffset;
+	while (nextOffset - &mContents[0] != 0) {
 		CMAP cmap;
-		r = read_cmap(&cmap, nextOffset);
+		r = read_cmap(&cmap, nextOffset - 8);
 		if (r) return r;
-		nextOffset = cmap.mNextCMAPOffset;
+		nextOffset = &mContents[0] + cmap.mNextCMAPOffset;
 	}
 
 	return 0;

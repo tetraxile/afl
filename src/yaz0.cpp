@@ -1,47 +1,25 @@
 // Yaz0 compression file format
 // explanation of format in include/yaz0.h
 
+#include "yaz0.h"
+
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
 
 #include "types.h"
-#include "yaz0.h"
-
-u16 read_u16_be(const std::vector<u8>& buffer, size_t offset) {
-	return (buffer[offset] << 8) | buffer[offset+1];
-}
-
-u32 read_u32_be(const std::vector<u8>& buffer, size_t offset) {
-	return (buffer[offset+0] << 24) |
-	       (buffer[offset+1] << 16) |
-	       (buffer[offset+2] <<  8) |
-	        buffer[offset+3];
-}
-
-void write_u16_be(std::vector<u8>& buffer, size_t offset, u16 value) {
-	buffer[offset+0] = value >> 8 & 0xff;
-	buffer[offset+1] = value >> 0 & 0xff;
-}
-
-void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value) {
-	buffer[offset+0] = value >> 24 & 0xff;
-	buffer[offset+1] = value >> 16 & 0xff;
-	buffer[offset+2] = value >>  8 & 0xff;
-	buffer[offset+3] = value >>  0 & 0xff;
-}
+#include "util.h"
 
 namespace yaz0 {
 
-s32 decompress(const std::vector<u8>& input, std::vector<u8>& output) {
+result_t decompress(const std::vector<u8>& input, std::vector<u8>& output) {
 	u8 magic[4] = { input[0], input[1], input[2], input[3] };
 	if (magic[0] != 'Y' || magic[1] != 'a' || magic[2] != 'z' || magic[3] != '0') {
-		fprintf(stderr, "error: expected signature 'Yaz0', got '%s'\n", magic);
-		return 1;
+		return Error::BadSignature;
 	}
 
-	u32 uncompressedSize = read_u32_be(input, 4);
-	u32 alignment = read_u32_be(input, 8);
+	u32 uncompressedSize = reader::read_u32(&input[4], util::ByteOrder::Big);
+	u32 alignment = reader::read_u32(&input[8], util::ByteOrder::Big);
 
 	output.resize(uncompressedSize);
 
@@ -57,7 +35,7 @@ s32 decompress(const std::vector<u8>& input, std::vector<u8>& output) {
 			if (isCopy) {
 				output.at(dest++) = input.at(source++);
 			} else {
-				u16 data = read_u16_be(input, source);
+				u16 data = reader::read_u16(&input[source], util::ByteOrder::Big);
 				source += 2;
 
 				u16 count = data >> 0xc;
@@ -81,9 +59,9 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 	u32 uncompressedSize = input.size();
 
 	output.resize(0x10);
-	write_u32_be(output, 0x0, 0x59617a30);
-	write_u32_be(output, 0x4, uncompressedSize);
-	write_u32_be(output, 0x8, alignment);
+	util::write_u32_be(output, 0x0, 0x59617a30);
+	util::write_u32_be(output, 0x4, uncompressedSize);
+	util::write_u32_be(output, 0x8, alignment);
 
 	// TODO: remove candidates list and just keep track of first candidate,
 	// recomputing only when necessary
@@ -135,12 +113,12 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 				if (count < 0x12) {
 					// 2-byte compressed data
 					u16 data = (count - 2) << 0xc | (offset & 0xfff);
-					write_u16_be(chunk, chunkDest, data);
+					util::write_u16_be(chunk, chunkDest, data);
 					chunkDest += 2;
 				} else {
 					// 3-byte compressed data
 					u16 data = offset & 0xfff;
-					write_u16_be(chunk, chunkDest, data);
+					util::write_u16_be(chunk, chunkDest, data);
 					chunkDest += 2;
 					chunk.at(chunkDest++) = count - 0x12;
 				}

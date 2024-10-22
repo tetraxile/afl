@@ -34,38 +34,8 @@ enum class ByteOrder {
 	Little,
 };
 
-class BinaryReader {
-public:
-	BinaryReader(BinaryReader& a) : mBuffer(a.mBuffer){}
-	BinaryReader(const std::vector<u8>& buffer) : mBuffer(buffer){}
-
-	u8 read_u8();
-	u16 read_u16();
-	u32 read_u24();
-	u32 read_u32();
-	u64 read_u64();
-	result_t check_signature(const char* expected, size_t length);
-	result_t read_byte_order(u16 expected_be = 0xfeff);
-	std::vector<u8> read_bytes(size_t size);
-	std::string read_string();
-
-	void seek(size_t offset);
-	void seek_rel(size_t offset);
-
-	size_t pos() const { return mCursor; }
-
-private:
-	const std::vector<u8>& mBuffer;
-	size_t mCursor = 0;
-	ByteOrder mByteOrder = ByteOrder::Big;
-};
-
 u16 bswap16(u16 value);
 u32 bswap32(u32 value);
-
-u16 read_u16_be(const std::vector<u8>& buffer, size_t offset);
-u32 read_u32_be(const std::vector<u8>& buffer, size_t offset);
-u32 read_u32_le(const std::vector<u8>& buffer, size_t offset);
 
 void write_u16_be(std::vector<u8>& buffer, size_t offset, u16 value);
 void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value);
@@ -73,6 +43,23 @@ void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value);
 bool is_equal(std::string str1, std::string str2);
 s32 read_file(const fs::path& filename, std::vector<u8>& contents);
 void write_file(const fs::path& filename, const std::vector<u8>& contents);
+}
+
+namespace reader {
+result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be);
+result_t check_signature(const u8* offset, const std::string& expected, size_t length);
+u8 read_u8(const u8* offset, util::ByteOrder byteOrder);
+u16 read_u16(const u8* offset, util::ByteOrder byteOrder);
+u32 read_u24(const u8* offset, util::ByteOrder byteOrder);
+u32 read_u32(const u8* offset, util::ByteOrder byteOrder);
+s32 read_s32(const u8* offset, util::ByteOrder byteOrder);
+f32 read_f32(const u8* offset, util::ByteOrder byteOrder);
+u64 read_u64(const u8* offset, util::ByteOrder byteOrder);
+s64 read_s64(const u8* offset, util::ByteOrder byteOrder);
+f64 read_f64(const u8* offset, util::ByteOrder byteOrder);
+std::string read_string(const u8* offset);
+std::string read_string(const u8* offset, size_t length);
+std::vector<u8> read_bytes(const u8* offset, size_t size);
 }
 
 #endif

@@ -6,6 +6,7 @@
 class SARC {
 public:
 	struct Header {
+		util::ByteOrder mByteOrder;
 		u32 mDataOffset;
 		u16 mVersion;
 	};
@@ -18,16 +19,16 @@ public:
 		std::string mName;
 	};
 
-	SARC(const std::vector<u8>& fileContents) : mReader(fileContents){}
+	SARC(const std::vector<u8>& fileContents) : mContents(fileContents){}
 
 	result_t read();
-	result_t read_header();
-	result_t read_sfat();
-	result_t read_sfnt();
+	result_t read_header(const u8* offset);
+	result_t read_sfat(const u8* offset);
+	result_t read_sfnt(const u8* offset);
 	result_t save(const char* outDir);
 
 private:
-	util::BinaryReader mReader;
+	const std::vector<u8>& mContents;
 	Header mHeader;
 	std::vector<File> mFiles;
 };

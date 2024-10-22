@@ -58,17 +58,18 @@ public:
 		std::vector<std::pair<u32, u32>> mMap;
 	};
 
-	BFFNT(const std::vector<u8>& fileContents) : mReader(fileContents){}
+	BFFNT(const std::vector<u8>& fileContents) : mContents(fileContents){}
 
 	result_t read();
-	result_t read_header();
-	result_t read_finf();
-	result_t read_tglp(u32 offset);
-	result_t read_cwdh(CWDH* cwdh, u32 offset);
-	result_t read_cmap(CMAP* cmap, u32 offset);
+	result_t read_header(const u8* offset);
+	result_t read_finf(const u8* offset);
+	result_t read_tglp(const u8* offset);
+	result_t read_cwdh(CWDH* cwdh, const u8* offset);
+	result_t read_cmap(CMAP* cmap, const u8* offset);
 
 private:
-	util::BinaryReader mReader;
+	const std::vector<u8>& mContents;
+	util::ByteOrder mByteOrder;
 	FINF mFontInfo;
 	TGLP mTexGlyph;
 	CWDH mCharWidth;
