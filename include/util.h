@@ -48,7 +48,7 @@ void write_file(const fs::path& filename, const std::vector<u8>& contents);
 namespace reader {
 result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be);
 result_t check_signature(const u8* offset, const std::string& expected, size_t length);
-u8 read_u8(const u8* offset, util::ByteOrder byteOrder);
+u8 read_u8(const u8* offset);
 u16 read_u16(const u8* offset, util::ByteOrder byteOrder);
 u32 read_u24(const u8* offset, util::ByteOrder byteOrder);
 u32 read_u32(const u8* offset, util::ByteOrder byteOrder);

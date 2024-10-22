@@ -18,8 +18,8 @@ result_t BNTX::read_header(const u8* offset) {
 	u32 version = reader::read_u32(offset + 8, util::ByteOrder::Big);
 	r = reader::read_byte_order(&mByteOrder, offset + 0xc, 0xFEFF);
 	if (r) return r;
-	u8 alignment = reader::read_u8(offset + 0xe, mByteOrder);
-	u8 targetAddrSize = reader::read_u8(offset + 0xf, mByteOrder);
+	u8 alignment = reader::read_u8(offset + 0xe);
+	u8 targetAddrSize = reader::read_u8(offset + 0xf);
 	u32 filenameOffset = reader::read_u32(offset + 0x10, mByteOrder);
 	u16 isRelocated = reader::read_u16(offset + 0x14, mByteOrder);
 	u16 firstBlockOffset = reader::read_u16(offset + 0x16, mByteOrder);

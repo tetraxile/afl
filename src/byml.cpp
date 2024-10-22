@@ -41,7 +41,7 @@ result_t BYML::init(const u8* fileData, const u8* offset) {
 }
 
 BYML::NodeType BYML::get_type() const {
-	return (NodeType)reader::read_u8(mOffset, mHeader.mByteOrder);
+	return (NodeType)reader::read_u8(mOffset);
 }
 
 u32 BYML::get_size() const {
@@ -100,7 +100,7 @@ result_t BYML::get_container_by_idx(BYML* container, u32 idx) const {
 	// round up to multiple of 4
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
-	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
+	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx);
 	if (childType != NodeType::Array && childType != NodeType::Hash)
 		return Error::WrongNodeType;
 
@@ -120,7 +120,7 @@ result_t BYML::get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType
 	// round up to multiple of 4
 	u32 valuesOffset = (4 + get_size() + 3) & ~3;
 
-	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx, mHeader.mByteOrder);
+	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx);
 	if (childType != expectedType)
 		return Error::WrongNodeType;
 
@@ -217,7 +217,7 @@ result_t BYML::get_container_by_key(BYML* container, const std::string& key) con
 		const u8* childOffset = mOffset + 4 + i*8;
 		u32 keyIdx = reader::read_u24(childOffset, mHeader.mByteOrder);
 		if (util::is_equal(key, get_hash_string(keyIdx))) {
-			NodeType type = (NodeType)reader::read_u8(childOffset + 3, mHeader.mByteOrder);
+			NodeType type = (NodeType)reader::read_u8(childOffset + 3);
 			if (type != NodeType::Array && type != NodeType::Hash)
 				return Error::WrongNodeType;
 
@@ -240,7 +240,7 @@ result_t BYML::get_node_by_key(const u8** offset, const std::string& key, NodeTy
 		const u8* childOffset = mOffset + 4 + i*8;
 		u32 keyIdx = reader::read_u24(childOffset, mHeader.mByteOrder);
 		if (util::is_equal(key, get_hash_string(keyIdx))) {
-			NodeType childType = (NodeType)reader::read_u8(childOffset + 3, mHeader.mByteOrder);
+			NodeType childType = (NodeType)reader::read_u8(childOffset + 3);
 			if (childType != expectedType)
 				return Error::WrongNodeType;
 

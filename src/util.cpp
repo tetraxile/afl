@@ -84,7 +84,7 @@ result_t check_signature(const u8* offset, const std::string& expected, size_t l
 	return 0;
 }
 
-u8 read_u8(const u8* offset, util::ByteOrder byteOrder) {
+u8 read_u8(const u8* offset) {
 	return *offset;
 }
 

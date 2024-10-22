@@ -28,16 +28,16 @@ result_t BFFNT::read_finf(const u8* offset) {
 
 	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
 	const u8* blockOffset = offset + 8;
-	mFontInfo.mFontType = reader::read_u8(blockOffset, mByteOrder);
-	mFontInfo.mHeight = reader::read_u8(blockOffset + 1, mByteOrder);
-	mFontInfo.mWidth = reader::read_u8(blockOffset + 2, mByteOrder);
-	mFontInfo.mAscent = reader::read_u8(blockOffset + 3, mByteOrder);
+	mFontInfo.mFontType = reader::read_u8(blockOffset);
+	mFontInfo.mHeight = reader::read_u8(blockOffset + 1);
+	mFontInfo.mWidth = reader::read_u8(blockOffset + 2);
+	mFontInfo.mAscent = reader::read_u8(blockOffset + 3);
 	mFontInfo.mLineFeed = reader::read_u16(blockOffset + 4, mByteOrder);
 	mFontInfo.mAlternateCharIndex = reader::read_u16(blockOffset + 6, mByteOrder);
-	mFontInfo.mDefaultCharWidth.mLeftWidth = reader::read_u8(blockOffset + 8, mByteOrder);
-	mFontInfo.mDefaultCharWidth.mGlyphWidth = reader::read_u8(blockOffset + 9, mByteOrder);
-	mFontInfo.mDefaultCharWidth.mCharWidth = reader::read_u8(blockOffset + 0xa, mByteOrder);
-	mFontInfo.mEncoding = reader::read_u8(blockOffset + 0xb, mByteOrder);
+	mFontInfo.mDefaultCharWidth.mLeftWidth = reader::read_u8(blockOffset + 8);
+	mFontInfo.mDefaultCharWidth.mGlyphWidth = reader::read_u8(blockOffset + 9);
+	mFontInfo.mDefaultCharWidth.mCharWidth = reader::read_u8(blockOffset + 0xa);
+	mFontInfo.mEncoding = reader::read_u8(blockOffset + 0xb);
 	mFontInfo.mTGLPOffset = reader::read_u32(blockOffset + 0xc, mByteOrder);
 	mFontInfo.mCWDHOffset = reader::read_u32(blockOffset + 0x10, mByteOrder);
 	mFontInfo.mCMAPOffset = reader::read_u32(blockOffset + 0x14, mByteOrder);
@@ -65,10 +65,10 @@ result_t BFFNT::read_tglp(const u8* offset) {
 	
 	u32 blockSize = reader::read_u32(offset + 4, mByteOrder);
 	const u8* blockOffset = offset + 8;
-	mTexGlyph.mCellWidth = reader::read_u8(blockOffset, mByteOrder);
-	mTexGlyph.mCellHeight = reader::read_u8(blockOffset + 1, mByteOrder);
-	mTexGlyph.mTexCount = reader::read_u8(blockOffset + 2, mByteOrder);
-	mTexGlyph.mMaxCharWidth = reader::read_u8(blockOffset + 3, mByteOrder);
+	mTexGlyph.mCellWidth = reader::read_u8(blockOffset);
+	mTexGlyph.mCellHeight = reader::read_u8(blockOffset + 1);
+	mTexGlyph.mTexCount = reader::read_u8(blockOffset + 2);
+	mTexGlyph.mMaxCharWidth = reader::read_u8(blockOffset + 3);
 	mTexGlyph.mPerTexSize = reader::read_u32(blockOffset + 4, mByteOrder);
 	mTexGlyph.mBaselinePos = reader::read_u16(blockOffset + 8, mByteOrder);
 	mTexGlyph.mTexFormat = reader::read_u16(blockOffset + 0xa, mByteOrder);
@@ -109,9 +109,9 @@ result_t BFFNT::read_cwdh(BFFNT::CWDH* cwdh, const u8* offset) {
 	for (u16 i = cwdh->mFirstEntryIdx; i < cwdh->mLastEntryIdx; i++) {
 		FontWidth width;
 		const u8* widthOffset = blockOffset + 8 + 3*i;
-		width.mLeftWidth = reader::read_u8(widthOffset, mByteOrder);
-		width.mGlyphWidth = reader::read_u8(widthOffset + 1, mByteOrder);
-		width.mCharWidth = reader::read_u8(widthOffset + 2, mByteOrder);
+		width.mLeftWidth = reader::read_u8(widthOffset);
+		width.mGlyphWidth = reader::read_u8(widthOffset + 1);
+		width.mCharWidth = reader::read_u8(widthOffset + 2);
 		entries.push_back(width);
 	}	
 
