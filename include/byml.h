@@ -66,7 +66,8 @@ public:
 	result_t get_u64_by_key(u64* out, const std::string& key) const;
 
 private:
-	result_t get_node_by_key(const u8** offset, const std::string& key) const;
+	result_t get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType) const;
+	result_t get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const;
 
 	const u8* mFileData = nullptr;
 	const u8* mOffset = nullptr;
