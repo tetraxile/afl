@@ -59,9 +59,9 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 	u32 uncompressedSize = input.size();
 
 	output.resize(0x10);
-	util::write_u32_be(output, 0x0, 0x59617a30);
-	util::write_u32_be(output, 0x4, uncompressedSize);
-	util::write_u32_be(output, 0x8, alignment);
+	writer::write_u32(output, 0x0, 0x59617a30, util::ByteOrder::Big);
+	writer::write_u32(output, 0x4, uncompressedSize, util::ByteOrder::Big);
+	writer::write_u32(output, 0x8, alignment, util::ByteOrder::Big);
 
 	// TODO: remove candidates list and just keep track of first candidate,
 	// recomputing only when necessary
@@ -113,12 +113,12 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 				if (count < 0x12) {
 					// 2-byte compressed data
 					u16 data = (count - 2) << 0xc | (offset & 0xfff);
-					util::write_u16_be(chunk, chunkDest, data);
+					writer::write_u16(chunk, chunkDest, data, util::ByteOrder::Big);
 					chunkDest += 2;
 				} else {
 					// 3-byte compressed data
 					u16 data = offset & 0xfff;
-					util::write_u16_be(chunk, chunkDest, data);
+					writer::write_u16(chunk, chunkDest, data, util::ByteOrder::Big);
 					chunkDest += 2;
 					chunk.at(chunkDest++) = count - 0x12;
 				}
