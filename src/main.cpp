@@ -225,7 +225,7 @@ s32 main(s32 argc, char* argv[]) {
 			r = util::read_file(argv[3], fileContents);
 			if (r) break;
 
-			BYML byml;
+			BYMLReader byml;
 			r = byml.init(&fileContents[0]);
 			if (r) break;
 			
@@ -233,7 +233,7 @@ s32 main(s32 argc, char* argv[]) {
 			printf("root size: %d\n", byml.get_size());
 			
 			for (s32 scenarioIdx = 0; scenarioIdx < byml.get_size(); scenarioIdx++) {
-				BYML scenario;
+				BYMLReader scenario;
 				r = byml.get_container_by_idx(&scenario, scenarioIdx);
 				if (r) break;
 
@@ -245,7 +245,7 @@ s32 main(s32 argc, char* argv[]) {
 					continue;
 				}
 
-				BYML objectList;
+				BYMLReader objectList;
 				r = scenario.get_container_by_key(&objectList, "ObjectList");
 				if (r) break;
 
@@ -253,7 +253,7 @@ s32 main(s32 argc, char* argv[]) {
 				printf("\t\tobject list size: %d\n", objectList.get_size());
 
 				for (s32 objectIdx = 0; objectIdx < objectList.get_size(); objectIdx++) {
-					BYML object;
+					BYMLReader object;
 					r = objectList.get_container_by_idx(&object, objectIdx);
 					if (r) break;
 

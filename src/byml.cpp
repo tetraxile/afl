@@ -2,9 +2,9 @@
 
 #include <cstdio>
 
-BYML::BYML() {}
+BYMLReader::BYMLReader() {}
 
-result_t BYML::init(const u8* fileData) {
+result_t BYMLReader::init(const u8* fileData) {
 	result_t r;
 
 	mFileData = fileData;
@@ -23,7 +23,7 @@ result_t BYML::init(const u8* fileData) {
 	return 0;
 }
 
-result_t BYML::init(const u8* fileData, const u8* offset) {
+result_t BYMLReader::init(const u8* fileData, const u8* offset) {
 	result_t r;
 
 	mFileData = fileData;
@@ -40,15 +40,15 @@ result_t BYML::init(const u8* fileData, const u8* offset) {
 	return 0;
 }
 
-BYML::NodeType BYML::get_type() const {
+BYMLReader::NodeType BYMLReader::get_type() const {
 	return (NodeType)reader::read_u8(mOffset);
 }
 
-u32 BYML::get_size() const {
+u32 BYMLReader::get_size() const {
 	return reader::read_u24(mOffset + 1, mHeader.mByteOrder);
 }
 
-std::string BYML::get_hash_string(u32 idx) const {
+std::string BYMLReader::get_hash_string(u32 idx) const {
 	const u8* base = mFileData + mHeader.mHashKeyTableOffset;
 
 	u32 size = reader::read_u24(base + 1, mHeader.mByteOrder);
@@ -61,7 +61,7 @@ std::string BYML::get_hash_string(u32 idx) const {
 	return reader::read_string(strOffset);
 }
 
-std::string BYML::get_value_string(u32 idx) const {
+std::string BYMLReader::get_value_string(u32 idx) const {
 	const u8* base = mFileData + mHeader.mStringValueTableOffset;
 
 	u32 size = reader::read_u24(base + 1, mHeader.mByteOrder);
@@ -74,7 +74,7 @@ std::string BYML::get_value_string(u32 idx) const {
 	return reader::read_string(strOffset);
 }
 
-bool BYML::has_key(const std::string& key) const {
+bool BYMLReader::has_key(const std::string& key) const {
 	if (get_type() != NodeType::Hash)
 		return false;
 
@@ -89,7 +89,7 @@ bool BYML::has_key(const std::string& key) const {
 	return false;
 }
 
-result_t BYML::get_type_by_idx(NodeType* type, u32 idx) const {
+result_t BYMLReader::get_type_by_idx(NodeType* type, u32 idx) const {
 	// TODO: allow indexing hash nodes by index?
 	if (get_type() != NodeType::Array)
 		return Error::WrongNodeType;
@@ -101,7 +101,7 @@ result_t BYML::get_type_by_idx(NodeType* type, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_container_by_idx(BYML* container, u32 idx) const {
+result_t BYMLReader::get_container_by_idx(BYMLReader* container, u32 idx) const {
 	// TODO: allow indexing hash nodes by index?
 	if (get_type() != NodeType::Array)
 		return Error::WrongNodeType;
@@ -121,7 +121,7 @@ result_t BYML::get_container_by_idx(BYML* container, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const {
+result_t BYMLReader::get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const {
 	// TODO: allow indexing hash nodes by index?
 	if (get_type() != NodeType::Array)
 		return Error::WrongNodeType;
@@ -140,7 +140,7 @@ result_t BYML::get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType
 	return 0;
 }
 
-result_t BYML::get_string_by_idx(std::string* out, u32 idx) const {
+result_t BYMLReader::get_string_by_idx(std::string* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::String);
 	if (r) return r;
@@ -150,7 +150,7 @@ result_t BYML::get_string_by_idx(std::string* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_bool_by_idx(bool* out, u32 idx) const {
+result_t BYMLReader::get_bool_by_idx(bool* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::Bool);
 	if (r) return r;
@@ -161,7 +161,7 @@ result_t BYML::get_bool_by_idx(bool* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_s32_by_idx(s32* out, u32 idx) const {
+result_t BYMLReader::get_s32_by_idx(s32* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::S32);
 	if (r) return r;
@@ -170,7 +170,7 @@ result_t BYML::get_s32_by_idx(s32* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_f32_by_idx(f32* out, u32 idx) const {
+result_t BYMLReader::get_f32_by_idx(f32* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::F32);
 	if (r) return r;
@@ -179,7 +179,7 @@ result_t BYML::get_f32_by_idx(f32* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_u32_by_idx(u32* out, u32 idx) const {
+result_t BYMLReader::get_u32_by_idx(u32* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::U32);
 	if (r) return r;
@@ -188,7 +188,7 @@ result_t BYML::get_u32_by_idx(u32* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_s64_by_idx(s64* out, u32 idx) const {
+result_t BYMLReader::get_s64_by_idx(s64* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::S64);
 	if (r) return r;
@@ -198,7 +198,7 @@ result_t BYML::get_s64_by_idx(s64* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_f64_by_idx(f64* out, u32 idx) const {
+result_t BYMLReader::get_f64_by_idx(f64* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::F64);
 	if (r) return r;
@@ -208,7 +208,7 @@ result_t BYML::get_f64_by_idx(f64* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_u64_by_idx(u64* out, u32 idx) const {
+result_t BYMLReader::get_u64_by_idx(u64* out, u32 idx) const {
 	const u8* offset;
 	result_t r = get_node_by_idx(&offset, idx, NodeType::U64);
 	if (r) return r;
@@ -218,7 +218,7 @@ result_t BYML::get_u64_by_idx(u64* out, u32 idx) const {
 	return 0;
 }
 
-result_t BYML::get_type_by_key(NodeType* type, const std::string& key) const {
+result_t BYMLReader::get_type_by_key(NodeType* type, const std::string& key) const {
 	if (get_type() != NodeType::Hash)
 		return Error::WrongNodeType;
 
@@ -235,7 +235,7 @@ result_t BYML::get_type_by_key(NodeType* type, const std::string& key) const {
 	return Error::InvalidKey;
 }
 
-result_t BYML::get_container_by_key(BYML* container, const std::string& key) const {
+result_t BYMLReader::get_container_by_key(BYMLReader* container, const std::string& key) const {
 	if (get_type() != NodeType::Hash)
 		return Error::WrongNodeType;
 
@@ -258,7 +258,7 @@ result_t BYML::get_container_by_key(BYML* container, const std::string& key) con
 	return Error::InvalidKey;
 }
 
-result_t BYML::get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType) const {
+result_t BYMLReader::get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType) const {
 	if (get_type() != NodeType::Hash)
 		return Error::WrongNodeType;
 
@@ -279,7 +279,7 @@ result_t BYML::get_node_by_key(const u8** offset, const std::string& key, NodeTy
 	return Error::InvalidKey;
 }
 
-result_t BYML::get_string_by_key(std::string* out, const std::string& key) const {
+result_t BYMLReader::get_string_by_key(std::string* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::String);
 	if (r) return r;
@@ -289,7 +289,7 @@ result_t BYML::get_string_by_key(std::string* out, const std::string& key) const
 	return 0;
 }
 
-result_t BYML::get_bool_by_key(bool* out, const std::string& key) const {
+result_t BYMLReader::get_bool_by_key(bool* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::Bool);
 	if (r) return r;
@@ -301,7 +301,7 @@ result_t BYML::get_bool_by_key(bool* out, const std::string& key) const {
 }
 
 
-result_t BYML::get_s32_by_key(s32* out, const std::string& key) const {
+result_t BYMLReader::get_s32_by_key(s32* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::S32);
 	if (r) return r;
@@ -310,7 +310,7 @@ result_t BYML::get_s32_by_key(s32* out, const std::string& key) const {
 	return 0;
 }
 
-result_t BYML::get_f32_by_key(f32* out, const std::string& key) const {
+result_t BYMLReader::get_f32_by_key(f32* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::F32);
 	if (r) return r;
@@ -319,7 +319,7 @@ result_t BYML::get_f32_by_key(f32* out, const std::string& key) const {
 	return 0;
 }
 
-result_t BYML::get_u32_by_key(u32* out, const std::string& key) const {
+result_t BYMLReader::get_u32_by_key(u32* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::U32);
 	if (r) return r;
@@ -328,7 +328,7 @@ result_t BYML::get_u32_by_key(u32* out, const std::string& key) const {
 	return 0;
 }
 
-result_t BYML::get_s64_by_key(s64* out, const std::string& key) const {
+result_t BYMLReader::get_s64_by_key(s64* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::S64);
 	if (r) return r;
@@ -338,7 +338,7 @@ result_t BYML::get_s64_by_key(s64* out, const std::string& key) const {
 	return 0;
 }
 
-result_t BYML::get_f64_by_key(f64* out, const std::string& key) const {
+result_t BYMLReader::get_f64_by_key(f64* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::F64);
 	if (r) return r;
@@ -348,7 +348,7 @@ result_t BYML::get_f64_by_key(f64* out, const std::string& key) const {
 	return 0;
 }
 
-result_t BYML::get_u64_by_key(u64* out, const std::string& key) const {
+result_t BYMLReader::get_u64_by_key(u64* out, const std::string& key) const {
 	const u8* offset;
 	result_t r = get_node_by_key(&offset, key, NodeType::U64);
 	if (r) return r;

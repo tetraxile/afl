@@ -3,7 +3,7 @@
 
 #include "util.h"
 
-class BYML {
+class BYMLReader {
 public:
 	enum class NodeType : u8 {
 		String = 0xa0,
@@ -34,7 +34,7 @@ public:
 		OutOfBounds = 0x103,
 	};
 
-	BYML();
+	BYMLReader();
 	result_t init(const u8* fileData);
 	result_t init(const u8* fileData, const u8* offset);
 
@@ -48,7 +48,7 @@ public:
 	result_t get_type_by_idx(NodeType* type, u32 idx) const;
 	result_t get_type_by_key(NodeType* type, const std::string& key) const;
 
-	result_t get_container_by_idx(BYML* container, u32 idx) const;
+	result_t get_container_by_idx(BYMLReader* container, u32 idx) const;
 	result_t get_string_by_idx(std::string* out, u32 idx) const;
 	result_t get_bool_by_idx(bool* out, u32 idx) const;
 	result_t get_s32_by_idx(s32* out, u32 idx) const;
@@ -58,7 +58,7 @@ public:
 	result_t get_f64_by_idx(f64* out, u32 idx) const;
 	result_t get_u64_by_idx(u64* out, u32 idx) const;
 
-	result_t get_container_by_key(BYML* container, const std::string& key) const;
+	result_t get_container_by_key(BYMLReader* container, const std::string& key) const;
 	result_t get_string_by_key(std::string* out, const std::string& key) const;
 	result_t get_bool_by_key(bool* out, const std::string& key) const;
 	result_t get_s32_by_key(s32* out, const std::string& key) const;
