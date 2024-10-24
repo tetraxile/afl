@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cstdio>
-#include <fstream>
 
 #include "types.h"
 #include "util.h"

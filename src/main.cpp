@@ -121,7 +121,7 @@ s32 main(s32 argc, char* argv[]) {
 			if (argc < 5) {
 				fprintf(
 					stderr,
-					"usage: %s yaz0 w <decompressed file> <compressed file> "
+					"usage: %s yaz0 w <decompressed file> <compressed file>"
 					"[alignment]\n",
 					argv[0]
 				);
