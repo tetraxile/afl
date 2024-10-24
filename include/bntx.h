@@ -7,7 +7,7 @@
 
 class BNTX {
 public:
-	BNTX(const std::vector<u8>& fileContents) : mContents(fileContents){}
+	BNTX(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
 	result_t read_header(const u8* offset);

@@ -1,12 +1,12 @@
-#include "util.h"
-#include "yaz0.h"
+#include <cstdio>
+#include <fstream>
+
 #include "bffnt.h"
 #include "bntx.h"
 #include "byml.h"
 #include "sarc.h"
-
-#include <cstdio>
-#include <fstream>
+#include "util.h"
+#include "yaz0.h"
 
 enum class Format {
 	Yaz0,
@@ -29,7 +29,7 @@ s32 main(s32 argc, char* argv[]) {
 		fprintf(stderr, "\toptions: read, r, write, w\n");
 		return 1;
 	}
-	
+
 	Format format;
 	if (util::is_equal(argv[1], "yaz0"))
 		format = Format::Yaz0;
@@ -58,43 +58,42 @@ s32 main(s32 argc, char* argv[]) {
 		return 1;
 	}
 
-	if (false) {
-		fs::path base_path = "/home/tetra/nx/smo/100/romfs/";
-		for (const auto& dir : fs::directory_iterator(base_path)) {
-			fs::path dir_name = dir.path().filename();
-			for (const fs::path& file_path : fs::directory_iterator(dir)) {
-				if (!file_path.string().ends_with(".szs")) continue;
-				const char* file_name = file_path.filename().c_str();
-				printf("%s\n", file_path.c_str());
-
-				printf("read\n");
-				std::vector<u8> contents;
-				s32 r = util::read_file(file_path, contents);
-				if (r != 0) return r;
-				u32 comp_size = contents.size();
-
-				printf("decomp\n");
-				std::vector<u8> decompressed;
-				r = yaz0::decompress(contents, decompressed);
-				if (r != 0) return r;
-				u32 decomp_size = decompressed.size();
-
-				printf("recomp\n");
-				std::vector<u8> recompressed;
-				yaz0::compress(decompressed, recompressed, 0x80);
-				u32 recomp_size = recompressed.size();
-
-				f32 orig_ratio = (f32)comp_size / (f32)decomp_size;
-				f32 my_ratio = (f32)recomp_size / (f32)decomp_size;
-
-				printf("%12x %12x %12x %.3f %.3f %s/%s\n", comp_size, decomp_size, recomp_size, orig_ratio, my_ratio, dir_name, file_name);
-			}
-		}
-
-
-		return 0;
-	}
-
+	// if (false) {
+	// 	fs::path base_path = "/home/tetra/nx/smo/100/romfs/";
+	// 	for (const auto& dir : fs::directory_iterator(base_path)) {
+	// 		fs::path dir_name = dir.path().filename();
+	// 		for (const fs::path& file_path : fs::directory_iterator(dir)) {
+	// 			if (!file_path.string().ends_with(".szs")) continue;
+	// 			const char* file_name = file_path.filename().c_str();
+	// 			printf("%s\n", file_path.c_str());
+	//
+	// 			printf("read\n");
+	// 			std::vector<u8> contents;
+	// 			s32 r = util::read_file(file_path, contents);
+	// 			if (r != 0) return r;
+	// 			u32 comp_size = contents.size();
+	//
+	// 			printf("decomp\n");
+	// 			std::vector<u8> decompressed;
+	// 			r = yaz0::decompress(contents, decompressed);
+	// 			if (r != 0) return r;
+	// 			u32 decomp_size = decompressed.size();
+	//
+	// 			printf("recomp\n");
+	// 			std::vector<u8> recompressed;
+	// 			yaz0::compress(decompressed, recompressed, 0x80);
+	// 			u32 recomp_size = recompressed.size();
+	//
+	// 			f32 orig_ratio = (f32)comp_size / (f32)decomp_size;
+	// 			f32 my_ratio = (f32)recomp_size / (f32)decomp_size;
+	//
+	// 			printf("%12x %12x %12x %.3f %.3f %s/%s\n", comp_size,
+	// decomp_size, recomp_size, orig_ratio, my_ratio, dir_name, file_name);
+	// 		}
+	// 	}
+	//
+	//     return 0;
+	// }
 
 	result_t r;
 
@@ -102,7 +101,9 @@ s32 main(s32 argc, char* argv[]) {
 	case Format::Yaz0:
 		if (option == Option::Read) {
 			if (argc < 5) {
-				fprintf(stderr, "usage: %s yaz0 r <compressed file> <decompressed file>\n", argv[0]);
+				fprintf(
+					stderr, "usage: %s yaz0 r <compressed file> <decompressed file>\n", argv[0]
+				);
 				return 1;
 			}
 
@@ -116,10 +117,14 @@ s32 main(s32 argc, char* argv[]) {
 
 			std::ofstream outfile(argv[4], std::ios::out | std::ios::binary);
 			outfile.write(reinterpret_cast<const char*>(outputBuffer.data()), outputBuffer.size());
-		}
-		else {
+		} else {
 			if (argc < 5) {
-				fprintf(stderr, "usage: %s yaz0 w <decompressed file> <compressed file> [alignment]\n", argv[0]);
+				fprintf(
+					stderr,
+					"usage: %s yaz0 w <decompressed file> <compressed file> "
+					"[alignment]\n",
+					argv[0]
+				);
 				return 1;
 			}
 
@@ -177,7 +182,7 @@ s32 main(s32 argc, char* argv[]) {
 
 			r = sarc.save(argv[4]);
 			if (r) break;
-		}	
+		}
 
 		break;
 	case Format::BFFNT:
@@ -195,7 +200,7 @@ s32 main(s32 argc, char* argv[]) {
 			r = bffnt.read();
 			if (r) break;
 		}
-		
+
 		break;
 	case Format::BNTX:
 		if (option == Option::Read) {
@@ -225,19 +230,19 @@ s32 main(s32 argc, char* argv[]) {
 			r = util::read_file(argv[3], fileContents);
 			if (r) break;
 
-			BYMLReader byml;
+			byml::Reader byml;
 			r = byml.init(&fileContents[0]);
 			if (r) break;
-			
-			printf("\nroot type: %x\n", byml.get_type());
+
+			printf("\nroot type: %x\n", (u8)byml.get_type());
 			printf("root size: %d\n", byml.get_size());
-			
+
 			for (s32 scenarioIdx = 0; scenarioIdx < byml.get_size(); scenarioIdx++) {
-				BYMLReader scenario;
+				byml::Reader scenario;
 				r = byml.get_container_by_idx(&scenario, scenarioIdx);
 				if (r) break;
 
-				printf("\tscenario type: %x\n", scenario.get_type());
+				printf("\tscenario type: %x\n", (u8)scenario.get_type());
 				printf("\tscenario size: %d\n", scenario.get_size());
 
 				if (!scenario.has_key("ObjectList")) {
@@ -245,15 +250,15 @@ s32 main(s32 argc, char* argv[]) {
 					continue;
 				}
 
-				BYMLReader objectList;
+				byml::Reader objectList;
 				r = scenario.get_container_by_key(&objectList, "ObjectList");
 				if (r) break;
 
-				printf("\t\tobject list type: %x\n", objectList.get_type());
+				printf("\t\tobject list type: %x\n", (u8)objectList.get_type());
 				printf("\t\tobject list size: %d\n", objectList.get_size());
 
 				for (s32 objectIdx = 0; objectIdx < objectList.get_size(); objectIdx++) {
-					BYMLReader object;
+					byml::Reader object;
 					r = objectList.get_container_by_idx(&object, objectIdx);
 					if (r) break;
 

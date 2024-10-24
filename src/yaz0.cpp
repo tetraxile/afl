@@ -69,7 +69,7 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 	candidates.reserve(0x1000);
 
 	std::vector<u8> chunk(24);
-	
+
 	s32 readPtr = 0;
 	u32 chunkDest = 0;
 	u32 bufferStart = 0;
@@ -81,8 +81,7 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 
 			// add matching bytes from buffer to candidates list
 			for (u32 j = bufferStart; j < readPtr; j++) {
-				if (input.at(j) == input.at(readPtr))
-					candidates.push_back(j);
+				if (input.at(j) == input.at(readPtr)) candidates.push_back(j);
 			}
 
 			// find which candidate matches the most input bytes (max of 0x111 bytes)
@@ -92,7 +91,7 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 				savedCandidate = candidates.front();
 				if (candidates.empty() || (readPtr + count >= input.size())) break;
 
-				for (auto it = candidates.begin(); it != candidates.end(); ) {
+				for (auto it = candidates.begin(); it != candidates.end();) {
 					if (input.at(readPtr + count) != input.at(*it + count))
 						it = candidates.erase(it);
 					else
@@ -139,4 +138,4 @@ void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignme
 	}
 }
 
-}
+} // namespace yaz0

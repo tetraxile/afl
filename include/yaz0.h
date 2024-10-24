@@ -18,10 +18,10 @@
 //   uncompressed size of the file. big endian.
 //
 // alignment: 4 bytes
-//   
+//
 // padding: 4 bytes
 //
-// 
+//
 // ===== COMPRESSION =====
 //
 // first, read one "code" byte. this byte's 8 bits will determine what to do
@@ -40,11 +40,11 @@
 //   number of bytes to read.
 //   if count is 0, then read another byte and add 0x12 to it.
 //   otherwise, just add 2.
-// 
+//
 // offset: 12 bits
 //   offset from write pointer in output buffer to read from.
 //   add 1 to the value, and then subtract it from the write pointer.
-// 
+//
 //
 // subtract `offset` from the write pointer in the output buffer, and then
 // copy `count` bytes from there to the end of the output buffer.
@@ -67,6 +67,6 @@
 namespace yaz0 {
 s32 decompress(const std::vector<u8>& input, std::vector<u8>& output);
 void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignment);
-}
+} // namespace yaz0
 
 #endif

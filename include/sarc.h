@@ -19,7 +19,7 @@ public:
 		std::string mName;
 	};
 
-	SARC(const std::vector<u8>& fileContents) : mContents(fileContents){}
+	SARC(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
 	result_t read_header(const u8* offset);

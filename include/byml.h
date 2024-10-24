@@ -3,24 +3,32 @@
 
 #include "util.h"
 
-class BYMLReader {
-public:
-	enum class NodeType : u8 {
-		String = 0xa0,
-		Binary = 0xa1,
-		Array = 0xc0,
-		Hash = 0xc1,
-		StringTable = 0xc2,
-		Bool = 0xd0,
-		S32 = 0xd1,
-		F32 = 0xd2,
-		U32 = 0xd3,
-		S64 = 0xd4,
-		U64 = 0xd5,
-		F64 = 0xd6,
-		Null = 0xff,
-	};
+namespace byml {
 
+enum class NodeType : u8 {
+	String = 0xa0,
+	Binary = 0xa1,
+	Array = 0xc0,
+	Hash = 0xc1,
+	StringTable = 0xc2,
+	Bool = 0xd0,
+	S32 = 0xd1,
+	F32 = 0xd2,
+	U32 = 0xd3,
+	S64 = 0xd4,
+	U64 = 0xd5,
+	F64 = 0xd6,
+	Null = 0xff,
+};
+
+enum Error : result_t {
+	WrongNodeType = 0x101,
+	InvalidKey = 0x102,
+	OutOfBounds = 0x103,
+};
+
+class Reader {
+public:
 	struct Header {
 		util::ByteOrder mByteOrder;
 		u16 mVersion;
@@ -28,13 +36,7 @@ public:
 		u32 mStringValueTableOffset = 0;
 	};
 
-	enum Error : result_t {
-		WrongNodeType = 0x101,
-		InvalidKey = 0x102,
-		OutOfBounds = 0x103,
-	};
-
-	BYMLReader();
+	Reader();
 	result_t init(const u8* fileData);
 	result_t init(const u8* fileData, const u8* offset);
 
@@ -48,7 +50,7 @@ public:
 	result_t get_type_by_idx(NodeType* type, u32 idx) const;
 	result_t get_type_by_key(NodeType* type, const std::string& key) const;
 
-	result_t get_container_by_idx(BYMLReader* container, u32 idx) const;
+	result_t get_container_by_idx(Reader* container, u32 idx) const;
 	result_t get_string_by_idx(std::string* out, u32 idx) const;
 	result_t get_bool_by_idx(bool* out, u32 idx) const;
 	result_t get_s32_by_idx(s32* out, u32 idx) const;
@@ -58,7 +60,7 @@ public:
 	result_t get_f64_by_idx(f64* out, u32 idx) const;
 	result_t get_u64_by_idx(u64* out, u32 idx) const;
 
-	result_t get_container_by_key(BYMLReader* container, const std::string& key) const;
+	result_t get_container_by_key(Reader* container, const std::string& key) const;
 	result_t get_string_by_key(std::string* out, const std::string& key) const;
 	result_t get_bool_by_key(bool* out, const std::string& key) const;
 	result_t get_s32_by_key(s32* out, const std::string& key) const;
@@ -69,12 +71,16 @@ public:
 	result_t get_u64_by_key(u64* out, const std::string& key) const;
 
 private:
-	result_t get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType) const;
+	result_t get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType)
+		const;
 	result_t get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const;
 
 	const u8* mFileData = nullptr;
 	const u8* mOffset = nullptr;
 	Header mHeader;
 };
+
+
+} // namespace byml
 
 #endif

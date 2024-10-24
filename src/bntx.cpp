@@ -28,4 +28,3 @@ result_t BNTX::read_header(const u8* offset) {
 
 	return 0;
 }
-

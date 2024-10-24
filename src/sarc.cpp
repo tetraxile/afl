@@ -41,7 +41,7 @@ result_t SARC::read_sfat(const u8* offset) {
 
 	mFiles.reserve(nodeCount);
 	for (s32 i = 0; i < nodeCount; i++) {
-		const u8* fileOffset = offset + 0xc + 0x10*i;
+		const u8* fileOffset = offset + 0xc + 0x10 * i;
 		File file;
 		file.mHash = reader::read_u32(fileOffset, mHeader.mByteOrder);
 		file.mAttrs = reader::read_u32(fileOffset + 4, mHeader.mByteOrder);

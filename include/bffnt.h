@@ -58,7 +58,7 @@ public:
 		std::vector<std::pair<u32, u32>> mMap;
 	};
 
-	BFFNT(const std::vector<u8>& fileContents) : mContents(fileContents){}
+	BFFNT(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
 	result_t read_header(const u8* offset);

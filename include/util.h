@@ -1,12 +1,12 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "types.h"
-
 #include <filesystem>
 #include <string>
 #include <variant>
 #include <vector>
+
+#include "types.h"
 
 namespace fs = std::filesystem;
 
@@ -20,9 +20,9 @@ enum Error : result_t {
 
 constexpr const char* result_to_string(result_t r) {
 	switch (r) {
-		case Error::BadSignature: return "bad signature";
-		case Error::BadByteOrder: return "invalid byte order";
-		case Error::FileError: return "file error";
+	case Error::BadSignature: return "bad signature";
+	case Error::BadByteOrder: return "invalid byte order";
+	case Error::FileError: return "file error";
 	}
 	return "(unknown)";
 }
@@ -40,7 +40,7 @@ u32 bswap32(u32 value);
 bool is_equal(std::string str1, std::string str2);
 s32 read_file(const fs::path& filename, std::vector<u8>& contents);
 void write_file(const fs::path& filename, const std::vector<u8>& contents);
-}
+} // namespace util
 
 namespace reader {
 result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be);
@@ -57,7 +57,7 @@ f64 read_f64(const u8* offset, util::ByteOrder byteOrder);
 std::string read_string(const u8* offset);
 std::string read_string(const u8* offset, size_t length);
 std::vector<u8> read_bytes(const u8* offset, size_t size);
-}
+} // namespace reader
 
 namespace writer {
 void write_u8(std::vector<u8>& buffer, size_t offset, u8 value);
@@ -89,6 +89,6 @@ void write_f64_le(std::vector<u8>& buffer, size_t offset, f64 value);
 
 void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str);
 void write_bytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes);
-}
+} // namespace writer
 
 #endif
