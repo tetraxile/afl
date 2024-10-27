@@ -10,23 +10,6 @@
 
 namespace fs = std::filesystem;
 
-typedef s32 result_t;
-
-enum Error : result_t {
-	BadSignature = 1,
-	BadByteOrder,
-	FileError,
-};
-
-constexpr const char* result_to_string(result_t r) {
-	switch (r) {
-	case Error::BadSignature: return "bad signature";
-	case Error::BadByteOrder: return "invalid byte order";
-	case Error::FileError: return "file error";
-	}
-	return "(unknown)";
-}
-
 namespace util {
 
 enum class ByteOrder {

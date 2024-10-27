@@ -1,5 +1,6 @@
-#include "byml.h"
+#include "byml/reader.h"
 
+#include <cassert>
 #include <cstdio>
 
 namespace byml {
@@ -342,6 +343,5 @@ result_t Reader::get_u64_by_key(u64* out, const std::string& key) const {
 	*out = reader::read_u64(mFileData + value, mHeader.mByteOrder);
 	return 0;
 }
-
 
 } // namespace byml

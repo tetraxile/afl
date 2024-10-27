@@ -3,7 +3,7 @@
 
 #include "bffnt.h"
 #include "bntx.h"
-#include "byml.h"
+#include "byml/reader.h"
 #include "sarc.h"
 #include "util.h"
 #include "yaz0.h"
