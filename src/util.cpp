@@ -21,6 +21,11 @@ bool is_equal(std::string str1, std::string str2) {
 	return std::strcmp(str1.c_str(), str2.c_str()) == 0;
 }
 
+u32 round_up(u32 x, u32 power_of_2) {
+	u32 a = power_of_2 - 1;
+	return (x + a) & ~a;
+}
+
 result_t read_file(const fs::path& filename, std::vector<u8>& contents) {
 	std::ifstream fstream(filename, std::ios::binary);
 
@@ -297,7 +302,11 @@ void write_f64(std::vector<u8>& buffer, size_t offset, f64 value, util::ByteOrde
 	write_u64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
 }
 
-void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str) {}
+void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str) {
+	for (s32 i = 0; i < str.size(); i++)
+		write_u8(buffer, offset + i, str[i]);
+	write_u8(buffer, offset + str.size(), 0);
+}
 
 void write_bytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {}
 

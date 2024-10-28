@@ -4,6 +4,7 @@
 #include "bffnt.h"
 #include "bntx.h"
 #include "byml/reader.h"
+#include "byml/writer.h"
 #include "sarc.h"
 #include "util.h"
 #include "yaz0.h"
@@ -273,6 +274,48 @@ s32 main(s32 argc, char* argv[]) {
 				printf("\n");
 			}
 			if (r) break;
+		} else {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s byml w <output file>\n", argv[0]);
+				return 1;
+			}
+
+			byml::Writer byml(3);
+			byml.init();
+
+			byml.push_array();
+			byml.write_u32(123);
+			byml.write_f32(1.0f);
+			byml.write_s64(-1);
+			byml.write_string("hihi");
+
+			byml.push_array();
+			byml.write_bool(true);
+			byml.push_array();
+			byml.write_u32(1);
+			byml.pop();
+			byml.pop();
+
+			byml.push_array();
+			byml.write_bool(true);
+			byml.push_array();
+			byml.write_u32(2);
+			byml.pop();
+			byml.pop();
+
+			byml.push_hash();
+			byml.write_u32("a", 100);
+			byml.write_u32("b", 200);
+			byml.push_array("xyz");
+			byml.write_u32(123);
+			byml.pop();
+			byml.pop();
+
+			byml.pop();
+
+			// TODO: compression ratio for saving. can reuse identical container nodes/special type
+			// nodes
+			byml.save(argv[3], util::ByteOrder::Little);
 		}
 
 		break;

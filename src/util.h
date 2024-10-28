@@ -21,6 +21,7 @@ u16 bswap16(u16 value);
 u32 bswap32(u32 value);
 
 bool is_equal(std::string str1, std::string str2);
+u32 round_up(u32 x, u32 power_of_2);
 s32 read_file(const fs::path& filename, std::vector<u8>& contents);
 void write_file(const fs::path& filename, const std::vector<u8>& contents);
 } // namespace util
