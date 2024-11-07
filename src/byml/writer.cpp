@@ -37,7 +37,7 @@ void Writer::save(const std::string& filename, util::ByteOrder byteOrder) const 
 	if (mRoot) {
 		writePtr = (writePtr + 3) & ~3;
 		writer::write_u32_le(outputBuffer, 0xc, writePtr);
-		mRoot->write(outputBuffer, &writePtr, data64Offset);
+		mRoot->write(outputBuffer, &writePtr, data64Offset, mHashKeyStringTable, mValueStringTable);
 	} else {
 		writer::write_u32_le(outputBuffer, 0xc, 0); // no root offset
 	}
@@ -109,8 +109,8 @@ result_t Writer::push_array(const std::string& key) {
 
 	// increment stack level, create array and push it to the stack
 	Array* child = new Array; // XXX: leak
-	u32 keyIdx = mHashKeyStringTable.add_string(key);
-	parent->mNodes.push_back(std::make_pair(keyIdx, child));
+	mHashKeyStringTable.add_string(key);
+	parent->mNodes.push_back(std::make_pair(key, child));
 	mContainerStack[++mStackIdx] = child;
 
 	return 0;
@@ -128,8 +128,8 @@ result_t Writer::push_hash(const std::string& key) {
 
 	// increment stack level, create hash and push it to the stack
 	Hash* child = new Hash; // XXX: leak
-	u32 keyIdx = mHashKeyStringTable.add_string(key);
-	parent->mNodes.push_back(std::make_pair(keyIdx, child));
+	mHashKeyStringTable.add_string(key);
+	parent->mNodes.push_back(std::make_pair(key, child));
 	mContainerStack[++mStackIdx] = child;
 
 	return 0;
@@ -160,8 +160,8 @@ result_t Writer::write_node(InnerT value) {
 }
 
 result_t Writer::write_string(const std::string& value) {
-	u32 index = mValueStringTable.add_string(value);
-	return write_node<String>(index);
+	mValueStringTable.add_string(value);
+	return write_node<String>(value);
 }
 
 result_t Writer::write_bool(bool value) {
@@ -208,14 +208,14 @@ result_t Writer::write_node(const std::string& key, InnerT value) {
 
 	Hash* topHash = static_cast<Hash*>(top);
 	NodeT* node = new NodeT(value);
-	u32 keyIdx = mHashKeyStringTable.add_string(key);
-	topHash->mNodes.push_back(std::make_pair(keyIdx, static_cast<Node*>(node)));
+	mHashKeyStringTable.add_string(key);
+	topHash->mNodes.push_back(std::make_pair(key, static_cast<Node*>(node)));
 	return 0;
 }
 
 result_t Writer::write_string(const std::string& key, const std::string& value) {
-	u32 index = mValueStringTable.add_string(value);
-	return write_node<String>(key, index);
+	mValueStringTable.add_string(value);
+	return write_node<String>(key, value);
 }
 
 result_t Writer::write_bool(const std::string& key, bool value) {
@@ -260,11 +260,12 @@ u32 Writer::StringTable::write(std::vector<u8>& output, u32* offset) const {
 	u32 offsetsOffset = writePtr + 4;
 	writePtr = offsetsOffset + 4 * size() + 4;
 
-	for (s32 i = 0; i < size(); i++) {
-		const std::string& string = mStrings[i];
+	s32 i = 0;
+	for (const std::string& string : mStrings) {
 		writer::write_u32_le(output, offsetsOffset + 4 * i, writePtr - tableOffset);
 		writer::write_string(output, writePtr, string);
 		writePtr += string.size() + 1;
+		i++;
 	}
 
 	writer::write_u32_le(output, offsetsOffset + 4 * size(), writePtr - tableOffset);
@@ -273,22 +274,32 @@ u32 Writer::StringTable::write(std::vector<u8>& output, u32* offset) const {
 	return tableOffset;
 }
 
-u32 Writer::StringTable::add_string(const std::string& string) {
-	u32 index = size();
-	mStrings.push_back(string);
-	return index;
+void Writer::StringTable::add_string(const std::string& string) {
+	mStrings.insert(string);
+}
+
+u32 Writer::StringTable::find(const std::string& string) const {
+	s32 i = 0;
+	for (const std::string& test : mStrings) {
+		if (util::is_equal(string, test)) return i;
+		i++;
+	}
+
+	assert(false && "string wasn't added to string table");
+
+	return 0xffffff;
 }
 
 void Writer::Container::write_node(
 	std::vector<u8>& output, std::vector<std::pair<u32, Container*>>& deferredNodes, Node* node,
-	u32 offset, u32 data64Offset
+	const u32 offset, const u32 data64Offset, const StringTable& valueStringTable
 ) const {
 	if (node->is_container_node()) {
 		Container* container = static_cast<Container*>(node);
 		deferredNodes.push_back(std::make_pair(offset, container));
 	} else if (node->mType == NodeType::String) {
 		String* stringNode = static_cast<String*>(node);
-		stringNode->write(output, offset);
+		stringNode->write(output, offset, valueStringTable);
 	} else if (node->is_value_node()) {
 		ValueNode* valueNode = static_cast<ValueNode*>(node);
 		valueNode->write(output, offset);
@@ -298,7 +309,10 @@ void Writer::Container::write_node(
 	}
 }
 
-void Writer::Array::write(std::vector<u8>& output, u32* offset, u32 data64Offset) const {
+void Writer::Array::write(
+	std::vector<u8>& output, u32* offset, u32 data64Offset, const StringTable& hashKeyTable,
+	const StringTable& valueStringTable
+) const {
 	std::vector<std::pair<u32, Container*>> deferredNodes;
 
 	writer::write_u8(output, *offset, (u8)mType);
@@ -309,7 +323,7 @@ void Writer::Array::write(std::vector<u8>& output, u32* offset, u32 data64Offset
 		u32 typeOffset = *offset + 4 + i;
 		u32 valueOffset = *offset + valuesOffset + 4 * i;
 		writer::write_u8(output, typeOffset, (u8)node->mType);
-		write_node(output, deferredNodes, node, valueOffset, data64Offset);
+		write_node(output, deferredNodes, node, valueOffset, data64Offset, valueStringTable);
 	}
 
 	u32 offsetEntriesEnd = valuesOffset + 4 * size();
@@ -317,11 +331,14 @@ void Writer::Array::write(std::vector<u8>& output, u32* offset, u32 data64Offset
 	*offset = *offset + offsetEntriesEnd;
 	for (auto& [containerPointer, container] : deferredNodes) {
 		writer::write_u32_le(output, containerPointer, *offset);
-		container->write(output, offset, data64Offset);
+		container->write(output, offset, data64Offset, hashKeyTable, valueStringTable);
 	}
 }
 
-void Writer::Hash::write(std::vector<u8>& output, u32* offset, u32 data64Offset) const {
+void Writer::Hash::write(
+	std::vector<u8>& output, u32* offset, u32 data64Offset, const StringTable& hashKeyTable,
+	const StringTable& valueStringTable
+) const {
 	std::vector<std::pair<u32, Container*>> deferredNodes;
 
 	writer::write_u8(output, *offset, (u8)mType);
@@ -329,9 +346,10 @@ void Writer::Hash::write(std::vector<u8>& output, u32* offset, u32 data64Offset)
 	for (s32 i = 0; i < size(); i++) {
 		u32 entryOffset = *offset + 4 + 8 * i;
 		auto [key, node] = mNodes[i];
-		writer::write_u24_le(output, entryOffset, key);
+		u32 keyIdx = hashKeyTable.find(key);
+		writer::write_u24_le(output, entryOffset, keyIdx);
 		writer::write_u8(output, entryOffset + 3, (u8)node->mType);
-		write_node(output, deferredNodes, node, entryOffset + 4, data64Offset);
+		write_node(output, deferredNodes, node, entryOffset + 4, data64Offset, valueStringTable);
 	}
 
 	u32 offsetEntriesEnd = 4 + 8 * size();
@@ -339,12 +357,14 @@ void Writer::Hash::write(std::vector<u8>& output, u32* offset, u32 data64Offset)
 	*offset = *offset + offsetEntriesEnd;
 	for (auto& [containerPointer, container] : deferredNodes) {
 		writer::write_u32_le(output, containerPointer, *offset);
-		container->write(output, offset, data64Offset);
+		container->write(output, offset, data64Offset, hashKeyTable, valueStringTable);
 	}
 }
 
-void Writer::String::write(std::vector<u8>& output, u32 offset) const {
-	writer::write_u32_le(output, offset, mIndex);
+void Writer::String::write(std::vector<u8>& output, u32 offset, const StringTable& valueStringTable)
+	const {
+	u32 index = valueStringTable.find(mValue);
+	writer::write_u32_le(output, offset, index);
 }
 
 void Writer::Bool::write(std::vector<u8>& output, u32 offset) const {

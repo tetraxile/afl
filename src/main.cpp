@@ -283,38 +283,72 @@ s32 main(s32 argc, char* argv[]) {
 			byml::Writer byml(3);
 			byml.init();
 
-			byml.push_array();
-			byml.write_u32(123);
-			byml.write_f32(1.0f);
-			byml.write_s64(-1);
-			byml.write_string("hihi");
-
-			byml.push_array();
-			byml.write_bool(true);
-			byml.push_array();
-			byml.write_u32(1);
-			byml.pop();
-			byml.pop();
-
-			byml.push_array();
-			byml.write_bool(true);
-			byml.push_array();
-			byml.write_u32(2);
-			byml.pop();
-			byml.pop();
-
 			byml.push_hash();
-			byml.write_u32("a", 100);
-			byml.write_u32("b", 200);
-			byml.push_array("xyz");
-			byml.write_u32(123);
+
+			std::string one = "1";
+			byml.push_array(one);
+			byml.write_string("A");
+			byml.write_string("B");
+			byml.write_string("C");
+			byml.write_string("D");
+			byml.write_string("E");
+			byml.write_string("F");
 			byml.pop();
+
+			std::string two = "2";
+			byml.push_array(two);
+			byml.write_string("A");
+			byml.write_string("B");
+			byml.write_string("C");
+			byml.write_string("D");
+			byml.write_string("G");
+			byml.write_string("J");
+			byml.write_string("L");
+			byml.write_string("N");
+			byml.write_string("O");
+			byml.pop();
+
+			std::string three = "3";
+			byml.push_array(three);
+			byml.write_string("A");
+			byml.write_string("B");
+			byml.write_string("N");
+			byml.write_string("H");
+			byml.pop();
+
+			std::string four = "4";
+			byml.push_array(four);
+			byml.write_string("A");
+			byml.write_string("B");
+			byml.write_string("C");
+			byml.write_string("D");
+			byml.write_string("G");
+			byml.write_string("I");
+			byml.write_string("L");
+			byml.write_string("N");
+			byml.write_string("O");
+			byml.pop();
+
+			std::string five = "5";
+			byml.push_array(five);
+			byml.write_string("A");
+			byml.write_string("B");
+			byml.write_string("C");
+			byml.write_string("D");
+			byml.write_string("G");
+			byml.write_string("I");
+			byml.write_string("K");
+			byml.write_string("L");
+			byml.write_string("N");
+			byml.write_string("O");
 			byml.pop();
 
 			byml.pop();
 
 			// TODO: compression ratio for saving. can reuse identical container nodes/special type
 			// nodes
+			// TODO: less naive way of finding string idx in string table
+			// TODO: support big endian
 			byml.save(argv[3], util::ByteOrder::Little);
 		}
 

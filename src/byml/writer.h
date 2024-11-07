@@ -2,6 +2,7 @@
 #define BYML_WRITER_H
 
 #include <array>
+#include <set>
 
 #include "byml/common.h"
 #include "util.h"
@@ -32,20 +33,21 @@ private:
 	};
 
 	struct StringTable {
-		u32 add_string(const std::string& string);
+		void add_string(const std::string& string);
 		u32 write(std::vector<u8>& output, u32* offset) const;
+		u32 find(const std::string& string) const;
 
 		u32 size() const { return mStrings.size(); }
 
-		std::vector<std::string> mStrings;
+		std::set<std::string> mStrings;
 	};
 
 	struct String : Node {
-		String(u32 index) : Node(NodeType::String), mIndex(index) {}
+		String(const std::string& value) : Node(NodeType::String), mValue(value) {}
 
-		void write(std::vector<u8>& output, u32 offset) const;
+		void write(std::vector<u8>& output, u32 offset, const StringTable& valueStringTable) const;
 
-		u32 mIndex;
+		std::string mValue;
 	};
 
 	struct ValueNode : Node {
@@ -127,9 +129,14 @@ private:
 
 		void write_node(
 			std::vector<u8>& output, std::vector<std::pair<u32, Container*>>& deferredNodes,
-			Node* node, u32 offset, u32 data64Offset
+			Node* node, const u32 offset, const u32 data64Offset,
+			const StringTable& valueStringTable
 		) const;
-		virtual void write(std::vector<u8>& output, u32* offset, u32 data64Offset) const = 0;
+
+		virtual void write(
+			std::vector<u8>& output, u32* offset, u32 data64Offset, const StringTable& hashKeyTable,
+			const StringTable& valueStringTable
+		) const = 0;
 
 		virtual u32 size() const = 0;
 	};
@@ -144,7 +151,10 @@ private:
 
 		u32 size() const override { return mNodes.size(); }
 
-		void write(std::vector<u8>& output, u32* offset, u32 data64Offset) const override;
+		void write(
+			std::vector<u8>& output, u32* offset, u32 data64Offset, const StringTable& hashKeyTable,
+			const StringTable& valueStringTable
+		) const override;
 
 		std::vector<Node*> mNodes;
 	};
@@ -154,11 +164,14 @@ private:
 
 		~Hash() {}
 
-		void write(std::vector<u8>& output, u32* offset, u32 data64Offset) const override;
+		void write(
+			std::vector<u8>& output, u32* offset, u32 data64Offset, const StringTable& hashKeyTable,
+			const StringTable& valueStringTable
+		) const override;
 
 		u32 size() const override { return mNodes.size(); }
 
-		std::vector<std::pair<u32, Node*>> mNodes;
+		std::vector<std::pair<std::string, Node*>> mNodes;
 	};
 
 public:
