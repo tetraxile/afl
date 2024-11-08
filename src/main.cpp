@@ -96,7 +96,7 @@ s32 main(s32 argc, char* argv[]) {
 	//     return 0;
 	// }
 
-	result_t r;
+	result_t r = 0;
 
 	switch (format) {
 	case Format::Yaz0:
