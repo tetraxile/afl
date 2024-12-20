@@ -4,6 +4,9 @@ project(afl)
 
 include_directories(include)
 
-# add_subdirectory("lib/byml")
+set(LIB_FILES lib/bffnt.cpp lib/bntx.cpp lib/byml/reader.cpp lib/byml/writer.cpp lib/sarc.cpp lib/szs.cpp lib/util.cpp lib/yaz0.cpp)
+set(SRC_FILES src/main.cpp)
+set(TEST_FILES tests/main.cpp)
 
-add_executable(main src/main.cpp lib/bffnt.cpp lib/bntx.cpp lib/byml/reader.cpp lib/byml/writer.cpp lib/sarc.cpp lib/szs.cpp lib/util.cpp lib/yaz0.cpp)
+add_executable(main ${SRC_FILES} ${LIB_FILES})
+add_executable(test ${TEST_FILES} ${LIB_FILES})

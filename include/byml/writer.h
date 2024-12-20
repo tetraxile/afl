@@ -89,7 +89,7 @@ private:
 	};
 
 	struct Null : ValueNode {
-		Null() : ValueNode(NodeType::Null) {}
+		Null(u32) : ValueNode(NodeType::Null) {}
 
 		void write(std::vector<u8>& output, u32 offset) const override;
 	};
@@ -194,6 +194,7 @@ public:
 	result_t write_s64(s64 value);
 	result_t write_f64(f64 value);
 	result_t write_u64(u64 value);
+	result_t write_null();
 
 	result_t write_string(const std::string& key, const std::string& value);
 	result_t write_bool(const std::string& key, bool value);
@@ -203,6 +204,9 @@ public:
 	result_t write_s64(const std::string& key, s64 value);
 	result_t write_f64(const std::string& key, f64 value);
 	result_t write_u64(const std::string& key, u64 value);
+	result_t write_null(const std::string& key);
+
+	// TODO: write_null
 
 private:
 	template <typename NodeT, typename InnerT>

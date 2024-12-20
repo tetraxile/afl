@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <format>
 #include <fstream>
 
 #include "bffnt.h"
@@ -22,6 +23,116 @@ enum class Option {
 	Read,
 	Write,
 };
+
+std::string print_byml(const byml::Reader& node, s32 level = 0) {
+	// std::string indent(level, '\t');
+	std::string out;
+
+	if (node.get_type() == byml::NodeType::Array) {
+		out += "[";
+		for (s32 i = 0; i < node.get_size(); i++) {
+			byml::NodeType childType;
+			node.get_type_by_idx(&childType, i);
+			if (childType == byml::NodeType::Hash) {
+				byml::Reader container;
+				node.get_container_by_idx(&container, i);
+				out += print_byml(container, level + 1);
+			} else if (childType == byml::NodeType::String) {
+				std::string str;
+				node.get_string_by_idx(&str, i);
+				out += std::format("\"{}\"", str);
+			} else if (childType == byml::NodeType::Bool) {
+				bool value;
+				node.get_bool_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::S32) {
+				s32 value;
+				node.get_s32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::U32) {
+				u32 value;
+				node.get_u32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::F32) {
+				f32 value;
+				node.get_f32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::S64) {
+				s64 value;
+				node.get_s64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::U64) {
+				u64 value;
+				node.get_u64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::F64) {
+				f64 value;
+				node.get_f64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::Bool) {
+				out += "null";
+			} else {
+				out += std::format("{:x}", (u8)childType);
+			}
+			if (i != node.get_size() - 1) out += ", ";
+		}
+		out += "]";
+	} else if (node.get_type() == byml::NodeType::Hash) {
+		out += "{";
+		for (s32 i = 0; i < node.get_size(); i++) {
+			byml::NodeType childType;
+			node.get_type_by_idx(&childType, i);
+			u32 keyIdx;
+			node.get_key_by_idx(&keyIdx, i);
+			out += std::format("\"{}\": ", node.get_hash_string(keyIdx));
+			if (childType == byml::NodeType::Hash) {
+				byml::Reader container;
+				node.get_container_by_idx(&container, i);
+				out += print_byml(container, level + 1);
+			} else if (childType == byml::NodeType::String) {
+				std::string str;
+				node.get_string_by_idx(&str, i);
+				out += std::format("\"{}\"", str);
+			} else if (childType == byml::NodeType::Bool) {
+				bool value;
+				node.get_bool_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::S32) {
+				s32 value;
+				node.get_s32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::U32) {
+				u32 value;
+				node.get_u32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::F32) {
+				f32 value;
+				node.get_f32_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::S64) {
+				s64 value;
+				node.get_s64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::U64) {
+				u64 value;
+				node.get_u64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::F64) {
+				f64 value;
+				node.get_f64_by_idx(&value, i);
+				out += std::format("{}", value);
+			} else if (childType == byml::NodeType::Bool) {
+				out += "null";
+			} else {
+				out += std::format("{:x}", (u8)childType);
+			}
+			if (i != node.get_size() - 1) out += ", ";
+		}
+		out += "}";
+	}
+
+	return out;
+}
 
 s32 main(s32 argc, char* argv[]) {
 	if (argc < 3) {
@@ -58,43 +169,6 @@ s32 main(s32 argc, char* argv[]) {
 		fprintf(stderr, "error: unrecognized option '%s'\n", argv[2]);
 		return 1;
 	}
-
-	// if (false) {
-	// 	fs::path base_path = "/home/tetra/nx/smo/100/romfs/";
-	// 	for (const auto& dir : fs::directory_iterator(base_path)) {
-	// 		fs::path dir_name = dir.path().filename();
-	// 		for (const fs::path& file_path : fs::directory_iterator(dir)) {
-	// 			if (!file_path.string().ends_with(".szs")) continue;
-	// 			const char* file_name = file_path.filename().c_str();
-	// 			printf("%s\n", file_path.c_str());
-	//
-	// 			printf("read\n");
-	// 			std::vector<u8> contents;
-	// 			s32 r = util::read_file(file_path, contents);
-	// 			if (r != 0) return r;
-	// 			u32 comp_size = contents.size();
-	//
-	// 			printf("decomp\n");
-	// 			std::vector<u8> decompressed;
-	// 			r = yaz0::decompress(contents, decompressed);
-	// 			if (r != 0) return r;
-	// 			u32 decomp_size = decompressed.size();
-	//
-	// 			printf("recomp\n");
-	// 			std::vector<u8> recompressed;
-	// 			yaz0::compress(decompressed, recompressed, 0x80);
-	// 			u32 recomp_size = recompressed.size();
-	//
-	// 			f32 orig_ratio = (f32)comp_size / (f32)decomp_size;
-	// 			f32 my_ratio = (f32)recomp_size / (f32)decomp_size;
-	//
-	// 			printf("%12x %12x %12x %.3f %.3f %s/%s\n", comp_size,
-	// decomp_size, recomp_size, orig_ratio, my_ratio, dir_name, file_name);
-	// 		}
-	// 	}
-	//
-	//     return 0;
-	// }
 
 	result_t r = 0;
 
@@ -159,6 +233,11 @@ s32 main(s32 argc, char* argv[]) {
 
 			r = sarc.save(argv[4]);
 			if (r) break;
+		} else {
+			if (argc < 5) {
+				fprintf(stderr, "usage: %s sarc w <input dir> <archive>\n", argv[0]);
+				return 1;
+			}
 		}
 
 		break;
@@ -235,45 +314,8 @@ s32 main(s32 argc, char* argv[]) {
 			r = byml.init(&fileContents[0]);
 			if (r) break;
 
-			printf("\nroot type: %x\n", (u8)byml.get_type());
-			printf("root size: %d\n", byml.get_size());
-
-			for (s32 scenarioIdx = 0; scenarioIdx < byml.get_size(); scenarioIdx++) {
-				byml::Reader scenario;
-				r = byml.get_container_by_idx(&scenario, scenarioIdx);
-				if (r) break;
-
-				printf("\tscenario type: %x\n", (u8)scenario.get_type());
-				printf("\tscenario size: %d\n", scenario.get_size());
-
-				if (!scenario.has_key("ObjectList")) {
-					printf("\n");
-					continue;
-				}
-
-				byml::Reader objectList;
-				r = scenario.get_container_by_key(&objectList, "ObjectList");
-				if (r) break;
-
-				printf("\t\tobject list type: %x\n", (u8)objectList.get_type());
-				printf("\t\tobject list size: %d\n", objectList.get_size());
-
-				for (s32 objectIdx = 0; objectIdx < objectList.get_size(); objectIdx++) {
-					byml::Reader object;
-					r = objectList.get_container_by_idx(&object, objectIdx);
-					if (r) break;
-
-					std::string name;
-					r = object.get_string_by_key(&name, "UnitConfigName");
-					if (r) break;
-
-					printf("\t\t\tobject name: %s\n", name.c_str());
-				}
-				if (r) break;
-
-				printf("\n");
-			}
-			if (r) break;
+			std::string out = print_byml(byml);
+			printf("%s\n", out.c_str());
 		} else {
 			if (argc < 4) {
 				fprintf(stderr, "usage: %s byml w <output file>\n", argv[0]);

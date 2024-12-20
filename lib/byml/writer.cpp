@@ -198,6 +198,10 @@ result_t Writer::write_u64(u64 value) {
 	return write_node<U64>(index);
 }
 
+result_t Writer::write_null() {
+	return write_node<Null>(0);
+}
+
 template <typename NodeT, typename InnerT>
 result_t Writer::write_node(const std::string& key, InnerT value) {
 	if (mStackIdx == -1) return Error::EmptyStack;
@@ -244,6 +248,10 @@ result_t Writer::write_f64(const std::string& key, f64 value) {
 
 result_t Writer::write_u64(const std::string& key, u64 value) {
 	return write_node<U64>(key, value);
+}
+
+result_t Writer::write_null(const std::string& key) {
+	return write_node<Null>(key, 0);
 }
 
 u32 Writer::StringTable::write(std::vector<u8>& output, u32* offset) const {

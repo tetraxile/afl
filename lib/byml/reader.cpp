@@ -88,46 +88,62 @@ bool Reader::has_key(const std::string& key) const {
 	return false;
 }
 
+result_t Reader::get_container_offsets(const u8** typeOffset, const u8** valueOffset, u32 idx)
+	const {
+	if (get_type() == NodeType::Array) {
+		*typeOffset = mOffset + 4 + idx;
+		*valueOffset = mOffset + util::round_up(4 + get_size(), 4) + 4 * idx;
+	} else if (get_type() == NodeType::Hash) {
+		*typeOffset = mOffset + 7 + 8 * idx;
+		*valueOffset = mOffset + 8 + 8 * idx;
+	} else {
+		return Error::WrongNodeType;
+	}
+	if (idx >= get_size()) return Error::OutOfBounds;
+
+	return 0;
+}
+
 result_t Reader::get_type_by_idx(NodeType* type, u32 idx) const {
-	// TODO: allow indexing hash nodes by index?
-	if (get_type() != NodeType::Array) return Error::WrongNodeType;
+	const u8 *typeOffset, *valueOffset;
+	result_t r = get_container_offsets(&typeOffset, &valueOffset, idx);
+	if (r) return r;
+
+	*type = (NodeType)reader::read_u8(typeOffset);
+	return 0;
+}
+
+result_t Reader::get_key_by_idx(u32* key, u32 idx) const {
+	if (get_type() != NodeType::Hash) return Error::WrongNodeType;
 
 	if (idx >= get_size()) return Error::OutOfBounds;
 
-	*type = (NodeType)reader::read_u8(mOffset + 4 + idx);
+	*key = reader::read_u24(mOffset + 4 + idx * 8, mHeader.mByteOrder);
 	return 0;
 }
 
 result_t Reader::get_container_by_idx(Reader* container, u32 idx) const {
-	// TODO: allow indexing hash nodes by index?
-	if (get_type() != NodeType::Array) return Error::WrongNodeType;
+	const u8 *typeOffset, *valueOffset;
+	result_t r = get_container_offsets(&typeOffset, &valueOffset, idx);
+	if (r) return r;
 
-	if (idx >= get_size()) return Error::OutOfBounds;
-
-	// round up to multiple of 4
-	u32 valuesOffset = (4 + get_size() + 3) & ~3;
-
-	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx);
+	NodeType childType = (NodeType)reader::read_u8(typeOffset);
 	if (childType != NodeType::Array && childType != NodeType::Hash) return Error::WrongNodeType;
 
-	u32 value = reader::read_u32(mOffset + valuesOffset + 4 * idx, mHeader.mByteOrder);
+	u32 value = reader::read_u32(valueOffset, mHeader.mByteOrder);
 	container->init(mFileData, (const u8*)(mFileData + value));
 	return 0;
 }
 
 result_t Reader::get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const {
-	// TODO: allow indexing hash nodes by index?
-	if (get_type() != NodeType::Array) return Error::WrongNodeType;
+	const u8 *typeOffset, *valueOffset;
+	result_t r = get_container_offsets(&typeOffset, &valueOffset, idx);
+	if (r) return r;
 
-	if (idx >= get_size()) return Error::OutOfBounds;
-
-	// round up to multiple of 4
-	u32 valuesOffset = (4 + get_size() + 3) & ~3;
-
-	NodeType childType = (NodeType)reader::read_u8(mOffset + 4 + idx);
+	NodeType childType = (NodeType)reader::read_u8(typeOffset);
 	if (childType != expectedType) return Error::WrongNodeType;
 
-	*offset = mOffset + valuesOffset + 4 * idx;
+	*offset = valueOffset;
 	return 0;
 }
 

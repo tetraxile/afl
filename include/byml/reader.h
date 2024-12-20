@@ -28,6 +28,7 @@ public:
 
 	result_t get_type_by_idx(NodeType* type, u32 idx) const;
 	result_t get_type_by_key(NodeType* type, const std::string& key) const;
+	result_t get_key_by_idx(u32* key, u32 idx) const;
 
 	result_t get_container_by_idx(Reader* container, u32 idx) const;
 	result_t get_string_by_idx(std::string* out, u32 idx) const;
@@ -53,6 +54,8 @@ private:
 	result_t get_node_by_key(const u8** offset, const std::string& key, NodeType expectedType)
 		const;
 	result_t get_node_by_idx(const u8** offset, u32 idx, NodeType expectedType) const;
+
+	result_t get_container_offsets(const u8** typeOffset, const u8** valueOffset, u32 idx) const;
 
 	const u8* mFileData = nullptr;
 	const u8* mOffset = nullptr;
