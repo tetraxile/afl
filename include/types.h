@@ -24,6 +24,7 @@ enum Error : result_t {
 	BadSignature = 1,
 	BadByteOrder,
 	FileError,
+	FileNotFound,
 };
 
 constexpr const char* result_to_string(result_t r) {
@@ -31,6 +32,7 @@ constexpr const char* result_to_string(result_t r) {
 	case Error::BadSignature: return "bad signature";
 	case Error::BadByteOrder: return "invalid byte order";
 	case Error::FileError: return "file error";
+	case Error::FileNotFound: return "file not found";
 	}
 	return "(unknown)";
 }

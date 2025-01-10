@@ -25,7 +25,10 @@ public:
 	result_t read_header(const u8* offset);
 	result_t read_sfat(const u8* offset);
 	result_t read_sfnt(const u8* offset);
-	result_t save(const char* outDir);
+	const std::vector<std::string> get_filenames();
+	result_t save_file(const char* outDir, const char* filename);
+	result_t save_all(const char* outDir);
+	result_t get_file_data(std::vector<u8>& out, const char* filename);
 
 private:
 	const std::vector<u8>& mContents;

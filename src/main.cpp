@@ -231,7 +231,7 @@ s32 main(s32 argc, char* argv[]) {
 			r = sarc.read();
 			if (r) break;
 
-			r = sarc.save(argv[4]);
+			r = sarc.save_all(argv[4]);
 			if (r) break;
 		} else {
 			if (argc < 5) {
@@ -260,7 +260,7 @@ s32 main(s32 argc, char* argv[]) {
 			r = sarc.read();
 			if (r) break;
 
-			r = sarc.save(argv[4]);
+			r = sarc.save_all(argv[4]);
 			if (r) break;
 		}
 

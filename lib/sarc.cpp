@@ -54,8 +54,7 @@ result_t SARC::read_sfat(const u8* offset) {
 }
 
 result_t SARC::read_sfnt(const u8* offset) {
-	result_t r;
-	r = reader::check_signature(offset, "SFNT", 4);
+	result_t r = reader::check_signature(offset, "SFNT", 4);
 	if (r) return r;
 	u16 headerSize = reader::read_u16(offset + 4, mHeader.mByteOrder);
 
@@ -70,9 +69,32 @@ result_t SARC::read_sfnt(const u8* offset) {
 	return 0;
 }
 
-result_t SARC::save(const char* outDir) {
-	result_t r;
+const std::vector<std::string> SARC::get_filenames() {
+	std::vector<std::string> mFilenames;
+	for (const File& file : mFiles)
+		mFilenames.push_back(file.mName);
 
+	return mFilenames;
+}
+
+result_t SARC::save_file(const char* outDir, const char* filename) {
+	fs::path basePath(outDir);
+	fs::create_directory(basePath);
+
+	for (const File& file : mFiles) {
+		if (!util::is_equal(file.mName, filename)) continue;
+
+		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
+		u32 size = file.mEndOffset - file.mStartOffset;
+		std::vector<u8> contents = reader::read_bytes(offset, size);
+		util::write_file(basePath / file.mName, contents);
+		return 0;
+	}
+
+	return Error::FileNotFound;
+}
+
+result_t SARC::save_all(const char* outDir) {
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
@@ -84,4 +106,17 @@ result_t SARC::save(const char* outDir) {
 	}
 
 	return 0;
+}
+
+result_t SARC::get_file_data(std::vector<u8>& out, const char* filename) {
+	for (const File& file : mFiles) {
+		if (!util::is_equal(file.mName, filename)) continue;
+
+		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
+		u32 size = file.mEndOffset - file.mStartOffset;
+		out = reader::read_bytes(offset, size);
+		return 0;
+	}
+
+	return Error::FileNotFound;
 }
