@@ -2,3 +2,4 @@
 test/
 build/
 compile_commands.json
+Makefile
