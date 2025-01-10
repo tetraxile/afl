@@ -254,7 +254,7 @@ s32 main(s32 argc, char** argv) {
 	result_t r = 0;
 
 	std::vector<u8> fileContents;
-	r = util::read_file(argv[1], fileContents);
+	r = util::read_file(fileContents, argv[1]);
 	if (r) return r;
 
 	byml::Reader reader;

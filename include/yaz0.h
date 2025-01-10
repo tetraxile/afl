@@ -65,8 +65,8 @@
 #include "types.h"
 
 namespace yaz0 {
-s32 decompress(const std::vector<u8>& input, std::vector<u8>& output);
-void compress(const std::vector<u8>& input, std::vector<u8>& output, u32 alignment);
+s32 decompress(std::vector<u8>& output, const std::vector<u8>& input);
+void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignment);
 } // namespace yaz0
 
 #endif

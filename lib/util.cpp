@@ -26,7 +26,7 @@ u32 round_up(u32 x, u32 power_of_2) {
 	return (x + a) & ~a;
 }
 
-result_t read_file(const fs::path& filename, std::vector<u8>& contents) {
+result_t read_file(std::vector<u8>& contents, const fs::path& filename) {
 	std::ifstream fstream(filename, std::ios::binary);
 
 	if (fstream.eof() || fstream.fail()) {

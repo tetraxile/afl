@@ -76,7 +76,7 @@ result_t SARC::save(const char* outDir) {
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
-	for (File& file : mFiles) {
+	for (const File& file : mFiles) {
 		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
 		u32 size = file.mEndOffset - file.mStartOffset;
 		std::vector<u8> contents = reader::read_bytes(offset, size);

@@ -30,7 +30,7 @@ std::string print_byml(const byml::Reader& node, s32 level = 0) {
 
 	if (node.get_type() == byml::NodeType::Array) {
 		out += "[";
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			if (childType == byml::NodeType::Hash) {
@@ -79,7 +79,7 @@ std::string print_byml(const byml::Reader& node, s32 level = 0) {
 		out += "]";
 	} else if (node.get_type() == byml::NodeType::Hash) {
 		out += "{";
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			u32 keyIdx;
@@ -183,11 +183,11 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			std::vector<u8> outputBuffer;
-			r = yaz0::decompress(fileContents, outputBuffer);
+			r = yaz0::decompress(outputBuffer, fileContents);
 			if (r) break;
 
 			std::ofstream outfile(argv[4], std::ios::out | std::ios::binary);
@@ -206,11 +206,11 @@ s32 main(s32 argc, char* argv[]) {
 			u32 alignment = argc > 5 ? atoi(argv[5]) : 0x80;
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			std::vector<u8> outputBuffer;
-			yaz0::compress(fileContents, outputBuffer, alignment);
+			yaz0::compress(outputBuffer, fileContents, alignment);
 
 			util::write_file(argv[4], outputBuffer);
 		}
@@ -224,7 +224,7 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			SARC sarc(fileContents);
@@ -249,11 +249,11 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			std::vector<u8> decompressed;
-			r = yaz0::decompress(fileContents, decompressed);
+			r = yaz0::decompress(decompressed, fileContents);
 			if (r) break;
 
 			SARC sarc(decompressed);
@@ -273,7 +273,7 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			BFFNT bffnt(fileContents);
@@ -290,7 +290,7 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			BNTX bntx(fileContents);
@@ -307,7 +307,7 @@ s32 main(s32 argc, char* argv[]) {
 			}
 
 			std::vector<u8> fileContents;
-			r = util::read_file(argv[3], fileContents);
+			r = util::read_file(fileContents, argv[3]);
 			if (r) break;
 
 			byml::Reader byml;
