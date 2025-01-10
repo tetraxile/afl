@@ -25,7 +25,7 @@ offset | size | type                            | description
 0xa0   | 0x8  | nn::util::ResDic*               | offset of embedded file dictionary
 0xa8   | 0x8  |                                 | (also points to filename ResString?)
 0xb0   | 0x8  | StringPool*                     | string pool offset (wrong by +0x14?)
-0xb8   | 0x4  | u32                             | string pool count
+0xb8   | 0x4  | u32                             | string pool count (size in bytes?)
 0xbc   | 0x2  | u16                             | number of models
 0xbe   | 0x2  | u16                             | number of skeletal animations
 0xc0   | 0x2  | u16                             | number of material animations
@@ -361,6 +361,16 @@ offset | size  | type      | description
 -------+-------+-----------+----------------
 0x000  | 0x120 | u8[0x120] | runtime array 
 0x120  |       |           | end
+
+
+===== nn::gfx::ResEmbedFile =====
+
+offset | size | type      | description
+-------+------+-----------+----------------
+0x00   | 0x08 | void*     | offset to file
+0x08   | 0x04 | u32       | file size
+0x0c   | 0x04 |           | 
+0x10   |      |           | end
 
 
 ===== nn::util::ResDic =====
