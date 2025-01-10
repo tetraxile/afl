@@ -303,7 +303,7 @@ void write_f64(std::vector<u8>& buffer, size_t offset, f64 value, util::ByteOrde
 }
 
 void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str) {
-	for (s32 i = 0; i < str.size(); i++)
+	for (size_t i = 0; i < str.size(); i++)
 		write_u8(buffer, offset + i, str[i]);
 	write_u8(buffer, offset + str.size(), 0);
 }

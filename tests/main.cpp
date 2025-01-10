@@ -8,7 +8,7 @@
 
 void copy_byml_r(byml::Writer& writer, const byml::Reader& node) {
 	if (node.get_type() == byml::NodeType::Array) {
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			if (childType == byml::NodeType::Hash) {
@@ -60,7 +60,7 @@ void copy_byml_r(byml::Writer& writer, const byml::Reader& node) {
 			}
 		}
 	} else if (node.get_type() == byml::NodeType::Hash) {
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			u32 keyIdx;
@@ -133,7 +133,7 @@ std::string print_byml(const byml::Reader& node, s32 level = 0) {
 
 	if (node.get_type() == byml::NodeType::Array) {
 		out += "[";
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			if (childType == byml::NodeType::Hash) {
@@ -186,7 +186,7 @@ std::string print_byml(const byml::Reader& node, s32 level = 0) {
 		out += "]";
 	} else if (node.get_type() == byml::NodeType::Hash) {
 		out += "{";
-		for (s32 i = 0; i < node.get_size(); i++) {
+		for (u32 i = 0; i < node.get_size(); i++) {
 			byml::NodeType childType;
 			node.get_type_by_idx(&childType, i);
 			u32 keyIdx;

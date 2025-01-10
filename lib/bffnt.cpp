@@ -156,7 +156,7 @@ result_t BFFNT::read_cmap(BFFNT::CMAP* cmap, const u8* offset) {
 		// printf("\t%x\n", charCode);
 	} else if (cmap->mMapMethod == 1) { // table
 		std::vector<u16> range;
-		for (s32 i = cmap->mRangeBegin; i < cmap->mRangeEnd; i++) {
+		for (u32 i = cmap->mRangeBegin; i < cmap->mRangeEnd; i++) {
 			u16 charCode = reader::read_u16(mapOffset + 2 * i, mByteOrder);
 			range.push_back(charCode);
 		}

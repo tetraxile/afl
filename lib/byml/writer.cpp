@@ -326,7 +326,7 @@ void Writer::Array::write(
 	writer::write_u8(output, *offset, (u8)mType);
 	writer::write_u24_le(output, *offset + 1, size());
 	u32 valuesOffset = 4 + util::round_up(size(), 4);
-	for (s32 i = 0; i < size(); i++) {
+	for (u32 i = 0; i < size(); i++) {
 		Node* node = mNodes[i];
 		u32 typeOffset = *offset + 4 + i;
 		u32 valueOffset = *offset + valuesOffset + 4 * i;
@@ -351,7 +351,7 @@ void Writer::Hash::write(
 
 	writer::write_u8(output, *offset, (u8)mType);
 	writer::write_u24_le(output, *offset + 1, size());
-	for (s32 i = 0; i < size(); i++) {
+	for (u32 i = 0; i < size(); i++) {
 		u32 entryOffset = *offset + 4 + 8 * i;
 		auto [key, node] = mNodes[i];
 		u32 keyIdx = hashKeyTable.find(key);
