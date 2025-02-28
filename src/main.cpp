@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "bffnt.h"
+#include "bfres.h"
 #include "bntx.h"
 #include "byml/reader.h"
 #include "byml/writer.h"
@@ -17,6 +18,7 @@ enum class Format {
 	BFFNT,
 	BNTX,
 	BYML,
+	BFRES,
 };
 
 enum class Option {
@@ -137,7 +139,7 @@ std::string print_byml(const byml::Reader& node, s32 level = 0) {
 s32 main(s32 argc, char* argv[]) {
 	if (argc < 3) {
 		fprintf(stderr, "usage: %s <format> <option>\n", argv[0]);
-		fprintf(stderr, "\tformats: yaz0, sarc, szs, bffnt, bntx, byml\n");
+		fprintf(stderr, "\tformats: yaz0, sarc, szs, bffnt, bntx, byml, bfres\n");
 		fprintf(stderr, "\toptions: read, r, write, w\n");
 		return 1;
 	}
@@ -155,6 +157,8 @@ s32 main(s32 argc, char* argv[]) {
 		format = Format::BNTX;
 	else if (util::is_equal(argv[1], "byml"))
 		format = Format::BYML;
+	else if (util::is_equal(argv[1], "bfres"))
+		format = Format::BFRES;
 	else {
 		fprintf(stderr, "error: unrecognized format '%s'\n", argv[1]);
 		return 1;
@@ -392,6 +396,29 @@ s32 main(s32 argc, char* argv[]) {
 			// TODO: less naive way of finding string idx in string table
 			// TODO: support big endian
 			byml.save(argv[3], util::ByteOrder::Little);
+		}
+
+		break;
+	case Format::BFRES:
+		if (option == Option::Read) {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s bfres r <input file>\n", argv[0]);
+				return 1;
+			}
+
+			std::vector<u8> fileContents;
+			r = util::read_file(fileContents, argv[3]);
+			if (r) break;
+
+			BFRES bfres(fileContents);
+			r = bfres.read();
+			if (r) break;
+
+		} else {
+			if (argc < 4) {
+				fprintf(stderr, "usage: %s bfres w <input file>\n", argv[0]);
+				return 1;
+			}
 		}
 
 		break;
