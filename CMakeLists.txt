@@ -11,4 +11,4 @@ set(SOURCES lib/afl/bffnt.cpp lib/afl/bfres.cpp lib/afl/bntx.cpp lib/afl/byml/re
 
 add_compile_options(-Wall -Werror -Wextra -Wno-unused-variable)
 
-add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
