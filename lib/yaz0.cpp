@@ -45,8 +45,10 @@ result_t decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 
 				u16 offset = (data & 0xfff) + 1;
 
-				for (s32 j = 0; j < count; j++)
-					output.at(dest++) = output.at(dest - offset);
+				for (s32 j = 0; j < count; j++) {
+					output.at(dest) = output.at(dest - offset);
+					dest++;
+				}
 			}
 		}
 	}
@@ -69,7 +71,7 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 
 	std::vector<u8> chunk(24);
 
-	s32 readPtr = 0;
+	u32 readPtr = 0;
 	u32 chunkDest = 0;
 	u32 bufferStart = 0;
 
@@ -123,7 +125,7 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 			}
 
 			readPtr += count;
-			bufferStart = std::max(0, readPtr - 0x1000);
+			bufferStart = std::max(0u, readPtr - 0x1000);
 
 			if (readPtr >= input.size()) break;
 		}

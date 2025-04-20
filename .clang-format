@@ -79,7 +79,3 @@ Standard: c++20
 TypeNames: [ u8, s8, u16, s16, u32, s32, f32, u64, s64, f64 ]
 TabWidth: 4
 UseTab: AlignWithSpaces
-
-
-
-

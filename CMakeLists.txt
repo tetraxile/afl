@@ -11,5 +11,7 @@ set(LIB_FILES lib/bffnt.cpp lib/bfres.cpp lib/bntx.cpp lib/byml/reader.cpp lib/b
 set(SRC_FILES src/main.cpp)
 set(TEST_FILES tests/main.cpp)
 
+add_compile_options(-Wall -Werror -Wextra -Wno-unused-variable)
+
 add_executable(main ${SRC_FILES} ${LIB_FILES})
 add_executable(test ${TEST_FILES} ${LIB_FILES})

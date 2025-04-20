@@ -1,4 +1,5 @@
 #include "sarc.h"
+#include <cassert>
 
 result_t SARC::read() {
 	result_t r;
@@ -23,9 +24,10 @@ result_t SARC::read_header(const u8* offset) {
 	r = reader::read_byte_order(&mHeader.mByteOrder, offset + 6, 0xFEFF);
 	if (r) return r;
 
-	u32 fileSize = reader::read_u32(offset + 8, mHeader.mByteOrder);
+	mHeader.mFileSize = reader::read_u32(offset + 8, mHeader.mByteOrder);
 	mHeader.mDataOffset = reader::read_u32(offset + 0xc, mHeader.mByteOrder);
 	mHeader.mVersion = reader::read_u16(offset + 0x10, mHeader.mByteOrder);
+	assert(mHeader.mVersion == 0x100);
 	// 2 padding bytes
 
 	return 0;
@@ -36,6 +38,7 @@ result_t SARC::read_sfat(const u8* offset) {
 	r = reader::check_signature(offset, "SFAT", 4);
 	if (r) return r;
 	u16 headerSize = reader::read_u16(offset + 4, mHeader.mByteOrder);
+	assert(headerSize == 0xc);
 	u16 nodeCount = reader::read_u16(offset + 6, mHeader.mByteOrder);
 	u32 hashKey = reader::read_u32(offset + 8, mHeader.mByteOrder);
 
@@ -57,6 +60,7 @@ result_t SARC::read_sfnt(const u8* offset) {
 	result_t r = reader::check_signature(offset, "SFNT", 4);
 	if (r) return r;
 	u16 headerSize = reader::read_u16(offset + 4, mHeader.mByteOrder);
+	assert(headerSize == 0x8);
 
 	const u8* nameTableOffset = offset + 8;
 	for (File& file : mFiles) {
@@ -77,7 +81,7 @@ const std::vector<std::string> SARC::get_filenames() {
 	return mFilenames;
 }
 
-result_t SARC::save_file(const char* outDir, const char* filename) {
+result_t SARC::save_file(const std::string& outDir, const std::string& filename) {
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
@@ -94,7 +98,7 @@ result_t SARC::save_file(const char* outDir, const char* filename) {
 	return Error::FileNotFound;
 }
 
-result_t SARC::save_all(const char* outDir) {
+result_t SARC::save_all(const std::string& outDir) {
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
@@ -108,13 +112,24 @@ result_t SARC::save_all(const char* outDir) {
 	return 0;
 }
 
-result_t SARC::get_file_data(std::vector<u8>& out, const char* filename) {
+result_t SARC::get_file_data(std::vector<u8>& out, const std::string& filename) {
 	for (const File& file : mFiles) {
 		if (!util::is_equal(file.mName, filename)) continue;
 
 		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
 		u32 size = file.mEndOffset - file.mStartOffset;
 		out = reader::read_bytes(offset, size);
+		return 0;
+	}
+
+	return Error::FileNotFound;
+}
+
+result_t SARC::get_file_size(u32* out, const std::string& filename) {
+	for (const File& file : mFiles) {
+		if (!util::is_equal(file.mName, filename)) continue;
+
+		*out = file.mEndOffset - file.mStartOffset;
 		return 0;
 	}
 

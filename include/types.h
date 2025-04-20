@@ -25,6 +25,7 @@ enum Error : result_t {
 	BadByteOrder,
 	FileError,
 	FileNotFound,
+	DirNotFound,
 };
 
 constexpr const char* result_to_string(result_t r) {
@@ -33,6 +34,7 @@ constexpr const char* result_to_string(result_t r) {
 	case Error::BadByteOrder: return "invalid byte order";
 	case Error::FileError: return "file error";
 	case Error::FileNotFound: return "file not found";
+	case Error::DirNotFound: return "directory not found";
 	}
 	return "(unknown)";
 }

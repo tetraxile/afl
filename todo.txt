@@ -1,8 +1,16 @@
-- byml writer
 - bntx reader (BCn/ASTC library?)
 - convert existing format readers from object oriented design (i.e. more lazy loading kind of stuff, like SARC.read -> SARC.init + SARC.get_filename_by_idx + SARC.get_file_by_name etc)
 - write more docs
 - bfres reader
 - szs reader
 - rewrite yaz0 compression algorithm to not store every candidate
-- implement byml hash key binary search
+
+- byml
+    - implement hash key binary search
+    - compression ratio for saving. can reuse identical container nodes/special type nodes
+    - less naive way of finding string idx in string table
+    - support big endian
+
+
+document what each object does
+work on object database

@@ -308,6 +308,9 @@ void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str
 	write_u8(buffer, offset + str.size(), 0);
 }
 
-void write_bytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {}
+void write_bytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {
+	for (size_t i = 0; i < bytes.size(); i++)
+		write_u8(buffer, offset + i, bytes[i]);
+}
 
 } // namespace writer

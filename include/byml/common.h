@@ -7,7 +7,6 @@ namespace byml {
 
 enum class NodeType : u8 {
 	String = 0xa0,
-	Binary = 0xa1,
 	Array = 0xc0,
 	Hash = 0xc1,
 	StringTable = 0xc2,
@@ -27,6 +26,7 @@ enum Error : result_t {
 	OutOfBounds = 0x103,
 	EmptyStack = 0x104,
 	FullStack = 0x105,
+	InvalidVersion = 0x106,
 };
 
 } // namespace byml
