@@ -4,8 +4,8 @@
 #include <vector>
 #include <set>
 
-#include "byml/common.h"
-#include "util.h"
+#include "afl/byml/common.h"
+#include "afl/util.h"
 
 namespace byml {
 

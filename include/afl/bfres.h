@@ -1,13 +1,13 @@
-#ifndef BNTX_H
-#define BNTX_H
+#ifndef BFRES_H
+#define BFRES_H
 
 #include <vector>
 
-#include "util.h"
+#include "afl/util.h"
 
-class BNTX {
+class BFRES {
 public:
-	BNTX(const std::vector<u8>& fileContents) : mContents(fileContents) {}
+	BFRES(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
 	result_t read_header(const u8* offset);

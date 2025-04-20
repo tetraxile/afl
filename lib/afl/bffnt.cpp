@@ -1,9 +1,9 @@
-#include "bffnt.h"
+#include "afl/bffnt.h"
 
 #include <cassert>
 #include <cstdio>
 
-#include "util.h"
+#include "afl/util.h"
 
 result_t BFFNT::read_header(const u8* offset) {
 	result_t r;

@@ -1,4 +1,4 @@
-#include "bntx.h"
+#include "afl/bntx.h"
 
 #include <cstdio>
 

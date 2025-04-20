@@ -1,4 +1,4 @@
-#include "util.h"
+#include "afl/util.h"
 
 #include <bit>
 #include <cassert>

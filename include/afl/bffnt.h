@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "types.h"
-#include "util.h"
+#include "afl/types.h"
+#include "afl/util.h"
 
 class BFFNT {
 public:

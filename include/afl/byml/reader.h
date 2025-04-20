@@ -1,8 +1,8 @@
 #ifndef BYML_READER_H
 #define BYML_READER_H
 
-#include "byml/common.h"
-#include "util.h"
+#include "afl/byml/common.h"
+#include "afl/util.h"
 
 namespace byml {
 

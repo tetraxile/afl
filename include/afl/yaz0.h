@@ -62,7 +62,7 @@
 
 #include <vector>
 
-#include "types.h"
+#include "afl/types.h"
 
 namespace yaz0 {
 s32 decompress(std::vector<u8>& output, const std::vector<u8>& input);

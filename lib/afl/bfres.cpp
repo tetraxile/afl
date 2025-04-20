@@ -1,4 +1,4 @@
-#include "bfres.h"
+#include "afl/bfres.h"
 
 #include <cstdio>
 

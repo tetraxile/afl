@@ -1,7 +1,7 @@
 #ifndef BYML_COMMON_H
 #define BYML_COMMON_H
 
-#include "types.h"
+#include "afl/types.h"
 
 namespace byml {
 

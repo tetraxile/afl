@@ -7,11 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(include)
 
-set(LIB_FILES lib/bffnt.cpp lib/bfres.cpp lib/bntx.cpp lib/byml/reader.cpp lib/byml/writer.cpp lib/sarc.cpp lib/szs.cpp lib/util.cpp lib/yaz0.cpp)
-set(SRC_FILES src/main.cpp)
-set(TEST_FILES tests/main.cpp)
+set(SOURCES lib/afl/bffnt.cpp lib/afl/bfres.cpp lib/afl/bntx.cpp lib/afl/byml/reader.cpp lib/afl/byml/writer.cpp lib/afl/sarc.cpp lib/afl/szs.cpp lib/afl/util.cpp lib/afl/yaz0.cpp)
 
 add_compile_options(-Wall -Werror -Wextra -Wno-unused-variable)
 
-add_executable(main ${SRC_FILES} ${LIB_FILES})
-add_executable(test ${TEST_FILES} ${LIB_FILES})
+add_library(${PROJECT_NAME} ${SOURCES})

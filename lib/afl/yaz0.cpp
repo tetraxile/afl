@@ -1,13 +1,13 @@
 // Yaz0 compression file format
 // explanation of format in include/yaz0.h
 
-#include "yaz0.h"
+#include "afl/yaz0.h"
 
 #include <algorithm>
 #include <cstdio>
 
-#include "types.h"
-#include "util.h"
+#include "afl/types.h"
+#include "afl/util.h"
 
 namespace yaz0 {
 

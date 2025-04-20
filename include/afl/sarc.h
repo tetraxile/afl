@@ -1,7 +1,7 @@
 #ifndef SARC_H
 #define SARC_H
 
-#include "util.h"
+#include "afl/util.h"
 
 class SARC {
 public:
