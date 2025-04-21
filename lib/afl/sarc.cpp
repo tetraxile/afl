@@ -96,7 +96,7 @@ result_t SARC::save_file(const std::string& outDir, const std::string& filename)
 		return 0;
 	}
 
-	return Error::FileNotFound;
+	return util::Error::FileNotFound;
 }
 
 result_t SARC::save_all(const std::string& outDir) {
@@ -123,7 +123,7 @@ result_t SARC::get_file_data(std::vector<u8>& out, const std::string& filename) 
 		return 0;
 	}
 
-	return Error::FileNotFound;
+	return util::Error::FileNotFound;
 }
 
 result_t SARC::get_file_size(u32* out, const std::string& filename) {
@@ -134,5 +134,5 @@ result_t SARC::get_file_size(u32* out, const std::string& filename) {
 		return 0;
 	}
 
-	return Error::FileNotFound;
+	return util::Error::FileNotFound;
 }

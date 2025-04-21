@@ -65,14 +65,14 @@ result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be
 	else if (mark == util::bswap16(expected_be))
 		*out = util::ByteOrder::Little;
 	else
-		return Error::BadByteOrder;
+		return util::Error::BadByteOrder;
 
 	return 0;
 }
 
 result_t check_signature(const u8* offset, const std::string& expected, size_t length) {
 	for (size_t i = 0; i < length; i++)
-		if (offset[i] != expected[i]) return Error::BadSignature;
+		if (offset[i] != expected[i]) return util::Error::BadSignature;
 
 	return 0;
 }

@@ -14,7 +14,7 @@ namespace yaz0 {
 result_t decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 	u8 magic[4] = { input[0], input[1], input[2], input[3] };
 	if (magic[0] != 'Y' || magic[1] != 'a' || magic[2] != 'z' || magic[3] != '0') {
-		return Error::BadSignature;
+		return util::Error::BadSignature;
 	}
 
 	u32 uncompressedSize = reader::read_u32(&input[4], util::ByteOrder::Big);
