@@ -14,39 +14,39 @@ private:
 	struct Node {
 		Node(NodeType type) : mType(type) {}
 
-		bool is_container_node() const {
+		bool isContainerNode() const {
 			return mType == NodeType::Array || mType == NodeType::Hash;
 		}
 
-		bool is_value_node() const {
+		bool isValueNode() const {
 			return mType == NodeType::Bool || mType == NodeType::S32 || mType == NodeType::F32 ||
 			       mType == NodeType::U32 || mType == NodeType::Null;
 		}
 
-		bool is_value64_node() const {
+		bool isValue64Node() const {
 			return mType == NodeType::S64 || mType == NodeType::F64 || mType == NodeType::U64;
 		}
 
 		virtual ~Node() {}
-        virtual u32 calc_size() const = 0;
+        virtual u32 calcSize() const = 0;
         virtual void write(std::vector<u8>& outputBuffer, u32 offset) const = 0;
 
 		NodeType mType;
 	};
 
 	struct StringTable {
-		void add_string(const std::string& string);
+		void addString(const std::string& string);
 		void write(std::vector<u8>& outputBuffer, u32 offset) const;
 		u32 find(const std::string& string) const;
 
 		u32 size() const { return mStrings.size(); }
-        bool is_empty() const { return size() == 0; }
-        u32 calc_size() const {
+        bool isEmpty() const { return size() == 0; }
+        u32 calcSize() const {
             u32 headerSize = 8 + 4 * size();
             u32 stringsSize = 0;
             for (const auto& str : mStrings)
                 stringsSize += str.size() + 1;
-            return headerSize + util::round_up(stringsSize, 4);
+            return headerSize + util::roundUp(stringsSize, 4);
         }
 
 		std::set<std::string> mStrings;
@@ -56,13 +56,13 @@ private:
         Container(NodeType type) : Node(type) {}
 
         virtual size_t size() const = 0;
-        virtual void write_container(std::vector<u8>& outputBuffer) const = 0;
+        virtual void writeContainer(std::vector<u8>& outputBuffer) const = 0;
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u32_le(outputBuffer, offset, mOffset);
+            writer::writeU32LE(outputBuffer, offset, mOffset);
         }
 
-        void set_offset(u32 offset) { mOffset = offset; }
+        void setOffset(u32 offset) { mOffset = offset; }
 
         u32 mOffset;
     };
@@ -70,12 +70,12 @@ private:
     struct Array : Container {
         Array() : Container(NodeType::Array) {}
 
-        void write_container(std::vector<u8>& outputBuffer) const override;
+        void writeContainer(std::vector<u8>& outputBuffer) const override;
 
         size_t size() const override { return mNodes.size(); }
 
-        u32 calc_size() const override {
-            u32 listTypesSize = util::round_up(mNodes.size(), 4);
+        u32 calcSize() const override {
+            u32 listTypesSize = util::roundUp(mNodes.size(), 4);
             return 4 + listTypesSize + mNodes.size() * 4;
         }
 
@@ -85,11 +85,11 @@ private:
     struct Hash : Container {
         Hash(const StringTable& hashKeyStringTable) : Container(NodeType::Hash), mHashKeyStringTable(hashKeyStringTable) {}
 
-        void write_container(std::vector<u8>& outputBuffer) const override;
+        void writeContainer(std::vector<u8>& outputBuffer) const override;
 
         size_t size() const override { return mNodes.size(); }
 
-        u32 calc_size() const override {
+        u32 calcSize() const override {
             return 4 + 8 * mNodes.size();
         }
 
@@ -100,7 +100,7 @@ private:
     struct ValueNode : Node {
         ValueNode(NodeType type) : Node(type) {}
 
-        u32 calc_size() const override {
+        u32 calcSize() const override {
             return 4;
         }
     };
@@ -111,7 +111,7 @@ private:
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
             u32 index = mValueStringTable.find(mValue);
-            writer::write_u32_le(outputBuffer, offset, index);
+            writer::writeU32LE(outputBuffer, offset, index);
         }
 
         const StringTable& mValueStringTable;
@@ -122,7 +122,7 @@ private:
 		Bool(bool value) : ValueNode(NodeType::Bool), mValue(value) {}
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u32_le(outputBuffer, offset, mValue);
+            writer::writeU32LE(outputBuffer, offset, mValue);
         }
 
         bool mValue;
@@ -132,7 +132,7 @@ private:
 		S32(s32 value) : ValueNode(NodeType::S32), mValue(value) {}
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_s32_le(outputBuffer, offset, mValue);
+            writer::writeS32LE(outputBuffer, offset, mValue);
         }
 
         s32 mValue;
@@ -142,7 +142,7 @@ private:
 		F32(f32 value) : ValueNode(NodeType::F32), mValue(value) {}
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_f32_le(outputBuffer, offset, mValue);
+            writer::writeF32LE(outputBuffer, offset, mValue);
         }
 
         f32 mValue;
@@ -152,7 +152,7 @@ private:
 		U32(u32 value) : ValueNode(NodeType::U32), mValue(value) {}
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u32_le(outputBuffer, offset, mValue);
+            writer::writeU32LE(outputBuffer, offset, mValue);
         }
 
         u32 mValue;
@@ -162,24 +162,24 @@ private:
 		Null() : ValueNode(NodeType::Null) {}
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u32_le(outputBuffer, offset, 0);
+            writer::writeU32LE(outputBuffer, offset, 0);
         }
     };
 
     struct Value64Node : Node {
         Value64Node(NodeType type) : Node(type) {}
 
-        virtual void write_data64(std::vector<u8>& outputBuffer, u32 offset) const = 0;
+        virtual void writeData64(std::vector<u8>& outputBuffer, u32 offset) const = 0;
 
-        u32 calc_size() const override {
+        u32 calcSize() const override {
             return 4;
         }
 
         void write(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u32_le(outputBuffer, offset, mOffset);
+            writer::writeU32LE(outputBuffer, offset, mOffset);
         }
 
-        void set_offset(u32 offset) { mOffset = offset; }
+        void setOffset(u32 offset) { mOffset = offset; }
 
         u32 mOffset;
     };
@@ -187,8 +187,8 @@ private:
     struct S64 : Value64Node {
         S64(s64 value) : Value64Node(NodeType::S64), mValue(value) {}
 
-        void write_data64(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_s64_le(outputBuffer, offset, mValue);
+        void writeData64(std::vector<u8>& outputBuffer, u32 offset) const override {
+            writer::writeS64LE(outputBuffer, offset, mValue);
         }
 
         s64 mValue;
@@ -197,8 +197,8 @@ private:
     struct U64 : Value64Node {
         U64(u64 value) : Value64Node(NodeType::U64), mValue(value) {}
 
-        void write_data64(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_u64_le(outputBuffer, offset, mValue);
+        void writeData64(std::vector<u8>& outputBuffer, u32 offset) const override {
+            writer::writeU64LE(outputBuffer, offset, mValue);
         }
 
         u64 mValue;
@@ -207,8 +207,8 @@ private:
     struct F64 : Value64Node {
         F64(f64 value) : Value64Node(NodeType::F64), mValue(value) {}
 
-        void write_data64(std::vector<u8>& outputBuffer, u32 offset) const override {
-            writer::write_f64_le(outputBuffer, offset, mValue);
+        void writeData64(std::vector<u8>& outputBuffer, u32 offset) const override {
+            writer::writeF64LE(outputBuffer, offset, mValue);
         }
 
         f64 mValue;
@@ -220,35 +220,35 @@ public:
 
     void save(const std::string& filename, util::ByteOrder byteOrder);
 
-    result_t push_array();
-    result_t push_hash();
-    result_t push_array(const std::string& key);
-    result_t push_hash(const std::string& key);
+    result_t pushArray();
+    result_t pushHash();
+    result_t pushArray(const std::string& key);
+    result_t pushHash(const std::string& key);
     result_t pop();
 
-    result_t add_string(const std::string& value);
-    result_t add_bool(bool value);
-    result_t add_s32(s32 value);
-    result_t add_f32(f32 value);
-    result_t add_u32(u32 value);
-    result_t add_s64(s64 value);
-    result_t add_u64(u64 value);
-    result_t add_f64(f64 value);
-    result_t add_null();
+    result_t addString(const std::string& value);
+    result_t addBool(bool value);
+    result_t addS32(s32 value);
+    result_t addF32(f32 value);
+    result_t addU32(u32 value);
+    result_t addS64(s64 value);
+    result_t addU64(u64 value);
+    result_t addF64(f64 value);
+    result_t addNull();
 
-    result_t add_string(const std::string& key, const std::string& value);
-    result_t add_bool(const std::string& key, bool value);
-    result_t add_s32(const std::string& key, s32 value);
-    result_t add_f32(const std::string& key, f32 value);
-    result_t add_u32(const std::string& key, u32 value);
-    result_t add_s64(const std::string& key, s64 value);
-    result_t add_u64(const std::string& key, u64 value);
-    result_t add_f64(const std::string& key, f64 value);
-    result_t add_null(const std::string& key);
+    result_t addString(const std::string& key, const std::string& value);
+    result_t addBool(const std::string& key, bool value);
+    result_t addS32(const std::string& key, s32 value);
+    result_t addF32(const std::string& key, f32 value);
+    result_t addU32(const std::string& key, u32 value);
+    result_t addS64(const std::string& key, s64 value);
+    result_t addU64(const std::string& key, u64 value);
+    result_t addF64(const std::string& key, f64 value);
+    result_t addNull(const std::string& key);
 
 private:
-    result_t add_node(Node* node);
-    result_t add_node(const std::string& key, Node* node);
+    result_t addNode(Node* node);
+    result_t addNode(const std::string& key, Node* node);
 
 	constexpr static u32 STACK_SIZE = 16;
 

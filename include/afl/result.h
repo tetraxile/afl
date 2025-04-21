@@ -1,9 +1,10 @@
 #pragma once
 
 #include "types.h"
+#include "util.h"
 #include "byml/common.h"
 
-constexpr const char* result_to_string(result_t r) {
+constexpr const char* resultToString(result_t r) {
 	switch (r) {
 	case util::Error::BadSignature: return "bad signature";
 	case util::Error::BadByteOrder: return "invalid byte order";

@@ -23,14 +23,14 @@ public:
 	SARC(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
-	result_t read_header(const u8* offset);
-	result_t read_sfat(const u8* offset);
-	result_t read_sfnt(const u8* offset);
-	const std::vector<std::string> get_filenames();
-	result_t save_file(const std::string& outDir, const std::string& filename);
-	result_t save_all(const std::string& outDir);
-	result_t get_file_data(std::vector<u8>& out, const std::string& filename);
-	result_t get_file_size(u32* out, const std::string& filename);
+	result_t readHeader(const u8* offset);
+	result_t readSFAT(const u8* offset);
+	result_t readSFNT(const u8* offset);
+	const std::vector<std::string> getFilenames();
+	result_t saveFile(const std::string& outDir, const std::string& filename);
+	result_t saveAll(const std::string& outDir);
+	result_t getFileData(std::vector<u8>& out, const std::string& filename);
+	result_t getFileSize(u32* out, const std::string& filename);
 
 private:
 	const std::vector<u8>& mContents;

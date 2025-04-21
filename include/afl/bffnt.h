@@ -61,11 +61,11 @@ public:
 	BFFNT(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
 	result_t read();
-	result_t read_header(const u8* offset);
-	result_t read_finf(const u8* offset);
-	result_t read_tglp(const u8* offset);
-	result_t read_cwdh(CWDH* cwdh, const u8* offset);
-	result_t read_cmap(CMAP* cmap, const u8* offset);
+	result_t readHeader(const u8* offset);
+	result_t readFINF(const u8* offset);
+	result_t readTGLP(const u8* offset);
+	result_t readCWDH(CWDH* cwdh, const u8* offset);
+	result_t readCMAP(CMAP* cmap, const u8* offset);
 
 private:
 	const std::vector<u8>& mContents;

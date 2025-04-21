@@ -17,8 +17,8 @@ result_t decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 		return util::Error::BadSignature;
 	}
 
-	u32 uncompressedSize = reader::read_u32(&input[4], util::ByteOrder::Big);
-	u32 alignment = reader::read_u32(&input[8], util::ByteOrder::Big);
+	u32 uncompressedSize = reader::readU32(&input[4], util::ByteOrder::Big);
+	u32 alignment = reader::readU32(&input[8], util::ByteOrder::Big);
 
 	output.resize(uncompressedSize);
 
@@ -34,7 +34,7 @@ result_t decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 			if (isCopy) {
 				output.at(dest++) = input.at(source++);
 			} else {
-				u16 data = reader::read_u16(&input[source], util::ByteOrder::Big);
+				u16 data = reader::readU16(&input[source], util::ByteOrder::Big);
 				source += 2;
 
 				u16 count = data >> 0xc;
@@ -60,9 +60,9 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 	u32 uncompressedSize = input.size();
 
 	output.resize(0x10);
-	writer::write_u32(output, 0x0, 0x59617a30, util::ByteOrder::Big);
-	writer::write_u32(output, 0x4, uncompressedSize, util::ByteOrder::Big);
-	writer::write_u32(output, 0x8, alignment, util::ByteOrder::Big);
+	writer::writeU32(output, 0x0, 0x59617a30, util::ByteOrder::Big);
+	writer::writeU32(output, 0x4, uncompressedSize, util::ByteOrder::Big);
+	writer::writeU32(output, 0x8, alignment, util::ByteOrder::Big);
 
 	// TODO: remove candidates list and just keep track of first candidate,
 	// recomputing only when necessary
@@ -113,12 +113,12 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 				if (count < 0x12) {
 					// 2-byte compressed data
 					u16 data = (count - 2) << 0xc | (offset & 0xfff);
-					writer::write_u16(chunk, chunkDest, data, util::ByteOrder::Big);
+					writer::writeU16(chunk, chunkDest, data, util::ByteOrder::Big);
 					chunkDest += 2;
 				} else {
 					// 3-byte compressed data
 					u16 data = offset & 0xfff;
-					writer::write_u16(chunk, chunkDest, data, util::ByteOrder::Big);
+					writer::writeU16(chunk, chunkDest, data, util::ByteOrder::Big);
 					chunkDest += 2;
 					chunk.at(chunkDest++) = count - 0x12;
 				}

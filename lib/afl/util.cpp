@@ -17,16 +17,16 @@ u32 bswap32(u32 value) {
 	       ((value & 0x00ff0000) >> 8) | ((value & 0xff000000) >> 24);
 }
 
-bool is_equal(std::string str1, std::string str2) {
+bool isEqual(std::string str1, std::string str2) {
 	return std::strcmp(str1.c_str(), str2.c_str()) == 0;
 }
 
-u32 round_up(u32 x, u32 power_of_2) {
-	u32 a = power_of_2 - 1;
+u32 roundUp(u32 x, u32 powerOf2) {
+	u32 a = powerOf2 - 1;
 	return (x + a) & ~a;
 }
 
-result_t read_file(std::vector<u8>& contents, const fs::path& filename) {
+result_t readFile(std::vector<u8>& contents, const fs::path& filename) {
 	std::ifstream fstream(filename, std::ios::binary);
 
 	if (fstream.eof() || fstream.fail()) {
@@ -50,7 +50,7 @@ result_t read_file(std::vector<u8>& contents, const fs::path& filename) {
 	return 0;
 }
 
-void write_file(const fs::path& filename, const std::vector<u8>& contents) {
+void writeFile(const fs::path& filename, const std::vector<u8>& contents) {
 	std::ofstream fstream(filename, std::ios::out | std::ios::binary);
 	fstream.write(reinterpret_cast<const char*>(contents.data()), contents.size());
 }
@@ -58,11 +58,11 @@ void write_file(const fs::path& filename, const std::vector<u8>& contents) {
 } // namespace util
 
 namespace reader {
-result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be) {
+result_t readByteOrder(util::ByteOrder* out, const u8* offset, u16 expectedBE) {
 	u16 mark = (offset[0] << 8) | offset[1];
-	if (mark == expected_be)
+	if (mark == expectedBE)
 		*out = util::ByteOrder::Big;
-	else if (mark == util::bswap16(expected_be))
+	else if (mark == util::bswap16(expectedBE))
 		*out = util::ByteOrder::Little;
 	else
 		return util::Error::BadByteOrder;
@@ -70,47 +70,47 @@ result_t read_byte_order(util::ByteOrder* out, const u8* offset, u16 expected_be
 	return 0;
 }
 
-result_t check_signature(const u8* offset, const std::string& expected, size_t length) {
+result_t checkSignature(const u8* offset, const std::string& expected, size_t length) {
 	for (size_t i = 0; i < length; i++)
 		if (offset[i] != expected[i]) return util::Error::BadSignature;
 
 	return 0;
 }
 
-u8 read_u8(const u8* offset) {
+u8 readU8(const u8* offset) {
 	return *offset;
 }
 
-u16 read_u16(const u8* offset, util::ByteOrder byteOrder) {
+u16 readU16(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
 		return (offset[0] << 8) | (offset[1] << 0);
 	else
 		return (offset[0] << 0) | (offset[1] << 8);
 }
 
-u32 read_u24(const u8* offset, util::ByteOrder byteOrder) {
+u32 readU24(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
 		return (offset[0] << 16) | (offset[1] << 8) | (offset[2] << 0);
 	else
 		return (offset[0] << 0) | (offset[1] << 8) | (offset[2] << 16);
 }
 
-u32 read_u32(const u8* offset, util::ByteOrder byteOrder) {
+u32 readU32(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
 		return (offset[0] << 24) | (offset[1] << 16) | (offset[2] << 8) | offset[3];
 	else
 		return offset[0] | (offset[1] << 8) | (offset[2] << 16) | (offset[3] << 24);
 }
 
-s32 read_s32(const u8* offset, util::ByteOrder byteOrder) {
-	return std::bit_cast<s32>(read_u32(offset, byteOrder));
+s32 readS32(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<s32>(readU32(offset, byteOrder));
 }
 
-f32 read_f32(const u8* offset, util::ByteOrder byteOrder) {
-	return std::bit_cast<f32>(read_u32(offset, byteOrder));
+f32 readF32(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<f32>(readU32(offset, byteOrder));
 }
 
-u64 read_u64(const u8* offset, util::ByteOrder byteOrder) {
+u64 readU64(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
 		return ((u64)offset[0] << 56) | ((u64)offset[1] << 48) | ((u64)offset[2] << 40) |
 		       ((u64)offset[3] << 32) | ((u64)offset[4] << 24) | ((u64)offset[5] << 16) |
@@ -121,59 +121,59 @@ u64 read_u64(const u8* offset, util::ByteOrder byteOrder) {
 		       ((u64)offset[6] << 48) | ((u64)offset[7] << 56);
 }
 
-s64 read_s64(const u8* offset, util::ByteOrder byteOrder) {
-	return std::bit_cast<s64>(read_u64(offset, byteOrder));
+s64 readS64(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<s64>(readU64(offset, byteOrder));
 }
 
-f64 read_f64(const u8* offset, util::ByteOrder byteOrder) {
-	return std::bit_cast<f64>(read_u64(offset, byteOrder));
+f64 readF64(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<f64>(readU64(offset, byteOrder));
 }
 
-std::string read_string(const u8* offset) {
+std::string readString(const u8* offset) {
 	std::string str((const char*)offset);
 	return str;
 }
 
-std::string read_string(const u8* offset, size_t length) {
+std::string readString(const u8* offset, size_t length) {
 	std::string str((const char*)offset, length);
 	return str;
 }
 
-std::vector<u8> read_bytes(const u8* offset, size_t size) {
+std::vector<u8> readBytes(const u8* offset, size_t size) {
 	std::vector<u8> section(offset, offset + size);
 	return section;
 }
 } // namespace reader
 
 namespace writer {
-void write_u8(std::vector<u8>& buffer, size_t offset, u8 value) {
+void writeU8(std::vector<u8>& buffer, size_t offset, u8 value) {
 	if (offset + 1 > buffer.size()) buffer.resize(offset + 1);
 
 	buffer[offset] = value;
 }
 
-void write_u16_be(std::vector<u8>& buffer, size_t offset, u16 value) {
+void writeU16BE(std::vector<u8>& buffer, size_t offset, u16 value) {
 	if (offset + 2 > buffer.size()) buffer.resize(offset + 2);
 
 	buffer[offset + 0] = value >> 8 & 0xff;
 	buffer[offset + 1] = value >> 0 & 0xff;
 }
 
-void write_u16_le(std::vector<u8>& buffer, size_t offset, u16 value) {
+void writeU16LE(std::vector<u8>& buffer, size_t offset, u16 value) {
 	if (offset + 2 > buffer.size()) buffer.resize(offset + 2);
 
 	buffer[offset + 0] = value >> 0 & 0xff;
 	buffer[offset + 1] = value >> 8 & 0xff;
 }
 
-void write_u16(std::vector<u8>& buffer, size_t offset, u16 value, util::ByteOrder byteOrder) {
+void writeU16(std::vector<u8>& buffer, size_t offset, u16 value, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		write_u16_be(buffer, offset, value);
+		writeU16BE(buffer, offset, value);
 	else
-		write_u16_le(buffer, offset, value);
+		writeU16LE(buffer, offset, value);
 }
 
-void write_u24_be(std::vector<u8>& buffer, size_t offset, u32 value) {
+void writeU24BE(std::vector<u8>& buffer, size_t offset, u32 value) {
 	if (offset + 3 > buffer.size()) buffer.resize(offset + 3);
 
 	buffer[offset + 0] = value >> 16 & 0xff;
@@ -181,7 +181,7 @@ void write_u24_be(std::vector<u8>& buffer, size_t offset, u32 value) {
 	buffer[offset + 2] = value >> 0 & 0xff;
 }
 
-void write_u24_le(std::vector<u8>& buffer, size_t offset, u32 value) {
+void writeU24LE(std::vector<u8>& buffer, size_t offset, u32 value) {
 	if (offset + 3 > buffer.size()) buffer.resize(offset + 3);
 
 	buffer[offset + 0] = value >> 0 & 0xff;
@@ -189,14 +189,14 @@ void write_u24_le(std::vector<u8>& buffer, size_t offset, u32 value) {
 	buffer[offset + 2] = value >> 16 & 0xff;
 }
 
-void write_u24(std::vector<u8>& buffer, size_t offset, u32 value, util::ByteOrder byteOrder) {
+void writeU24(std::vector<u8>& buffer, size_t offset, u32 value, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		write_u24_be(buffer, offset, value);
+		writeU24BE(buffer, offset, value);
 	else
-		write_u24_le(buffer, offset, value);
+		writeU24LE(buffer, offset, value);
 }
 
-void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value) {
+void writeU32BE(std::vector<u8>& buffer, size_t offset, u32 value) {
 	if (offset + 4 > buffer.size()) buffer.resize(offset + 4);
 
 	buffer[offset + 0] = value >> 24 & 0xff;
@@ -205,7 +205,7 @@ void write_u32_be(std::vector<u8>& buffer, size_t offset, u32 value) {
 	buffer[offset + 3] = value >> 0 & 0xff;
 }
 
-void write_u32_le(std::vector<u8>& buffer, size_t offset, u32 value) {
+void writeU32LE(std::vector<u8>& buffer, size_t offset, u32 value) {
 	if (offset + 4 > buffer.size()) buffer.resize(offset + 4);
 
 	buffer[offset + 0] = value >> 0 & 0xff;
@@ -214,38 +214,38 @@ void write_u32_le(std::vector<u8>& buffer, size_t offset, u32 value) {
 	buffer[offset + 3] = value >> 24 & 0xff;
 }
 
-void write_u32(std::vector<u8>& buffer, size_t offset, u32 value, util::ByteOrder byteOrder) {
+void writeU32(std::vector<u8>& buffer, size_t offset, u32 value, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		write_u32_be(buffer, offset, value);
+		writeU32BE(buffer, offset, value);
 	else
-		write_u32_le(buffer, offset, value);
+		writeU32LE(buffer, offset, value);
 }
 
-void write_s32_be(std::vector<u8>& buffer, size_t offset, s32 value) {
-	write_u32_be(buffer, offset, std::bit_cast<u32>(value));
+void writeS32BE(std::vector<u8>& buffer, size_t offset, s32 value) {
+	writeU32BE(buffer, offset, std::bit_cast<u32>(value));
 }
 
-void write_s32_le(std::vector<u8>& buffer, size_t offset, s32 value) {
-	write_u32_le(buffer, offset, std::bit_cast<u32>(value));
+void writeS32LE(std::vector<u8>& buffer, size_t offset, s32 value) {
+	writeU32LE(buffer, offset, std::bit_cast<u32>(value));
 }
 
-void write_s32(std::vector<u8>& buffer, size_t offset, s32 value, util::ByteOrder byteOrder) {
-	write_u32(buffer, offset, std::bit_cast<u32>(value), byteOrder);
+void writeS32(std::vector<u8>& buffer, size_t offset, s32 value, util::ByteOrder byteOrder) {
+	writeU32(buffer, offset, std::bit_cast<u32>(value), byteOrder);
 }
 
-void write_f32_be(std::vector<u8>& buffer, size_t offset, f32 value) {
-	write_u32_be(buffer, offset, std::bit_cast<u32>(value));
+void writeF32BE(std::vector<u8>& buffer, size_t offset, f32 value) {
+	writeU32BE(buffer, offset, std::bit_cast<u32>(value));
 }
 
-void write_f32_le(std::vector<u8>& buffer, size_t offset, f32 value) {
-	write_u32_le(buffer, offset, std::bit_cast<u32>(value));
+void writeF32LE(std::vector<u8>& buffer, size_t offset, f32 value) {
+	writeU32LE(buffer, offset, std::bit_cast<u32>(value));
 }
 
-void write_f32(std::vector<u8>& buffer, size_t offset, f32 value, util::ByteOrder byteOrder) {
-	write_u32(buffer, offset, std::bit_cast<u32>(value), byteOrder);
+void writeF32(std::vector<u8>& buffer, size_t offset, f32 value, util::ByteOrder byteOrder) {
+	writeU32(buffer, offset, std::bit_cast<u32>(value), byteOrder);
 }
 
-void write_u64_be(std::vector<u8>& buffer, size_t offset, u64 value) {
+void writeU64BE(std::vector<u8>& buffer, size_t offset, u64 value) {
 	if (offset + 8 > buffer.size()) buffer.resize(offset + 8);
 
 	buffer[offset + 0] = value >> 56 & 0xff;
@@ -258,7 +258,7 @@ void write_u64_be(std::vector<u8>& buffer, size_t offset, u64 value) {
 	buffer[offset + 7] = value >> 0 & 0xff;
 }
 
-void write_u64_le(std::vector<u8>& buffer, size_t offset, u64 value) {
+void writeU64LE(std::vector<u8>& buffer, size_t offset, u64 value) {
 	if (offset + 8 > buffer.size()) buffer.resize(offset + 8);
 
 	buffer[offset + 0] = value >> 0 & 0xff;
@@ -271,46 +271,46 @@ void write_u64_le(std::vector<u8>& buffer, size_t offset, u64 value) {
 	buffer[offset + 7] = value >> 56 & 0xff;
 }
 
-void write_u64(std::vector<u8>& buffer, size_t offset, u64 value, util::ByteOrder byteOrder) {
+void writeU64(std::vector<u8>& buffer, size_t offset, u64 value, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		write_u64_be(buffer, offset, value);
+		writeU64BE(buffer, offset, value);
 	else
-		write_u64_le(buffer, offset, value);
+		writeU64LE(buffer, offset, value);
 }
 
-void write_s64_be(std::vector<u8>& buffer, size_t offset, s64 value) {
-	write_u64_be(buffer, offset, std::bit_cast<u64>(value));
+void writeS64BE(std::vector<u8>& buffer, size_t offset, s64 value) {
+	writeU64BE(buffer, offset, std::bit_cast<u64>(value));
 }
 
-void write_s64_le(std::vector<u8>& buffer, size_t offset, s64 value) {
-	write_u64_le(buffer, offset, std::bit_cast<u64>(value));
+void writeS64LE(std::vector<u8>& buffer, size_t offset, s64 value) {
+	writeU64LE(buffer, offset, std::bit_cast<u64>(value));
 }
 
-void write_s64(std::vector<u8>& buffer, size_t offset, s64 value, util::ByteOrder byteOrder) {
-	write_u64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
+void writeS64(std::vector<u8>& buffer, size_t offset, s64 value, util::ByteOrder byteOrder) {
+	writeU64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
 }
 
-void write_f64_be(std::vector<u8>& buffer, size_t offset, f64 value) {
-	write_u64_be(buffer, offset, std::bit_cast<u64>(value));
+void writeF64BE(std::vector<u8>& buffer, size_t offset, f64 value) {
+	writeU64BE(buffer, offset, std::bit_cast<u64>(value));
 }
 
-void write_f64_le(std::vector<u8>& buffer, size_t offset, f64 value) {
-	write_u64_le(buffer, offset, std::bit_cast<u64>(value));
+void writeF64LE(std::vector<u8>& buffer, size_t offset, f64 value) {
+	writeU64LE(buffer, offset, std::bit_cast<u64>(value));
 }
 
-void write_f64(std::vector<u8>& buffer, size_t offset, f64 value, util::ByteOrder byteOrder) {
-	write_u64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
+void writeF64(std::vector<u8>& buffer, size_t offset, f64 value, util::ByteOrder byteOrder) {
+	writeU64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
 }
 
-void write_string(std::vector<u8>& buffer, size_t offset, const std::string& str) {
+void writeString(std::vector<u8>& buffer, size_t offset, const std::string& str) {
 	for (size_t i = 0; i < str.size(); i++)
-		write_u8(buffer, offset + i, str[i]);
-	write_u8(buffer, offset + str.size(), 0);
+		writeU8(buffer, offset + i, str[i]);
+	writeU8(buffer, offset + str.size(), 0);
 }
 
-void write_bytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {
+void writeBytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {
 	for (size_t i = 0; i < bytes.size(); i++)
-		write_u8(buffer, offset + i, bytes[i]);
+		writeU8(buffer, offset + i, bytes[i]);
 }
 
 } // namespace writer
