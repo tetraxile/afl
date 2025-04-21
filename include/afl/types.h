@@ -20,14 +20,4 @@ using f64 = double;
 
 typedef s32 result_t;
 
-enum Error : result_t {
-	BadSignature = 1,
-	BadByteOrder,
-	FileError,
-	FileNotFound,
-	DirNotFound,
-};
-
-
-
 #endif

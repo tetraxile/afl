@@ -11,6 +11,14 @@ namespace fs = std::filesystem;
 
 namespace util {
 
+enum Error : result_t {
+	BadSignature = 1,
+	BadByteOrder,
+	FileError,
+	FileNotFound,
+	DirNotFound,
+};
+
 enum class ByteOrder {
 	Big,
 	Little,
