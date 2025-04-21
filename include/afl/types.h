@@ -28,15 +28,6 @@ enum Error : result_t {
 	DirNotFound,
 };
 
-constexpr const char* result_to_string(result_t r) {
-	switch (r) {
-	case Error::BadSignature: return "bad signature";
-	case Error::BadByteOrder: return "invalid byte order";
-	case Error::FileError: return "file error";
-	case Error::FileNotFound: return "file not found";
-	case Error::DirNotFound: return "directory not found";
-	}
-	return "(unknown)";
-}
+
 
 #endif
