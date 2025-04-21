@@ -20,4 +20,18 @@ using f64 = double;
 
 typedef s32 result_t;
 
+template <typename T>
+struct Vector2 {
+	T x, y;
+};
+
+using Vector2f = Vector2<f32>;
+
+template <typename T>
+struct Vector3 {
+	T x, y, z;
+};
+
+using Vector3f = Vector3<f32>;
+
 #endif
