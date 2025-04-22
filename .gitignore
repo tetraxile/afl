@@ -1,5 +1,4 @@
 .cache/
-test/
+.vscode/
 build/
-compile_commands.json
-Makefile
+test/
