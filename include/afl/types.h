@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <cstdint>
+#include <functional>
 
 using s8 = std::int8_t;
 using s16 = std::int16_t;
@@ -41,5 +42,26 @@ struct Vector3 {
 };
 
 using Vector3f = Vector3<f32>;
+
+template <typename T>
+struct std::hash<Vector2<T>> {
+    std::size_t operator()(const Vector2<T>& vec) const noexcept {
+        size_t out = 0;
+        hashCombine(out, vec.x);
+        hashCombine(out, vec.y);
+        return out;
+    }
+};
+
+template <typename T>
+struct std::hash<Vector3<T>> {
+    std::size_t operator()(const Vector3<T>& vec) const noexcept {
+        size_t out = 0;
+        hashCombine(out, vec.x);
+        hashCombine(out, vec.y);
+        hashCombine(out, vec.z);
+        return out;
+    }
+};
 
 #endif
