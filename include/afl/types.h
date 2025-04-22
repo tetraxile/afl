@@ -23,6 +23,10 @@ typedef s32 result_t;
 template <typename T>
 struct Vector2 {
 	T x, y;
+
+    bool isEqual(const Vector2<T>& other) {
+        return x == other.x && y == other.y;
+    }
 };
 
 using Vector2f = Vector2<f32>;
@@ -30,6 +34,10 @@ using Vector2f = Vector2<f32>;
 template <typename T>
 struct Vector3 {
 	T x, y, z;
+
+    bool isEqual(const Vector3<T>& other) {
+        return x == other.x && y == other.y && z == other.z;
+    }
 };
 
 using Vector3f = Vector3<f32>;
