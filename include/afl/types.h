@@ -24,7 +24,7 @@ template <typename T>
 struct Vector2 {
 	T x, y;
 
-    bool isEqual(const Vector2<T>& other) {
+    bool isEqual(const Vector2<T>& other) const {
         return x == other.x && y == other.y;
     }
 };
@@ -35,7 +35,7 @@ template <typename T>
 struct Vector3 {
 	T x, y, z;
 
-    bool isEqual(const Vector3<T>& other) {
+    bool isEqual(const Vector3<T>& other) const {
         return x == other.x && y == other.y && z == other.z;
     }
 };
