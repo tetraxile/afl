@@ -20,8 +20,10 @@ result_t Reader::initHeader() {
 	mHeader.mStringValueTableOffset = reader::readU32(mFileData + 8, mHeader.mByteOrder);
 	assert(mHeader.mVersion == 2 || mHeader.mVersion == 3);
 
-	mHeader.mHashKeyTableSize = reader::readU24(mFileData + mHeader.mHashKeyTableOffset + 1, mHeader.mByteOrder);
-	mHeader.mStringValueTableSize = reader::readU24(mFileData + mHeader.mStringValueTableOffset + 1, mHeader.mByteOrder);
+	mHeader.mHashKeyTableSize =
+		reader::readU24(mFileData + mHeader.mHashKeyTableOffset + 1, mHeader.mByteOrder);
+	mHeader.mStringValueTableSize =
+		reader::readU24(mFileData + mHeader.mStringValueTableOffset + 1, mHeader.mByteOrder);
 
 	return 0;
 }
@@ -63,7 +65,7 @@ void Reader::initKeyOrder() {
 	std::vector<u32> offsets;
 	offsets.reserve(getSize());
 	for (u32 i = 0; i < getSize(); i++) {
-		NodeType type = (NodeType)reader::readU8(mOffset + 4 + i*8 + 3);
+		NodeType type = (NodeType)reader::readU8(mOffset + 4 + i * 8 + 3);
 		if (type == NodeType::Array || type == NodeType::Hash) {
 			u32 offset = reader::readU32(mOffset + 8 + i * 8, mHeader.mByteOrder);
 			offsets.push_back(offset);
@@ -75,8 +77,9 @@ void Reader::initKeyOrder() {
 	mKeyOrder.resize(getSize());
 	std::iota(mKeyOrder.begin(), mKeyOrder.end(), 0);
 
-	std::stable_sort(mKeyOrder.begin(), mKeyOrder.end(),
-		[&offsets](size_t i1, size_t i2) { return offsets.at(i1) < offsets.at(i2); });
+	std::stable_sort(mKeyOrder.begin(), mKeyOrder.end(), [&offsets](size_t i1, size_t i2) {
+		return offsets.at(i1) < offsets.at(i2);
+	});
 }
 
 NodeType Reader::getType() const {
@@ -132,8 +135,7 @@ bool Reader::isExistStringValue(const std::string& str) const {
 	return false;
 }
 
-result_t Reader::getContainerOffsets(const u8** typeOffset, const u8** valueOffset, u32 idx)
-	const {
+result_t Reader::getContainerOffsets(const u8** typeOffset, const u8** valueOffset, u32 idx) const {
 	if (getType() == NodeType::Array) {
 		*typeOffset = mOffset + 4 + idx;
 		*valueOffset = mOffset + util::roundUp(4 + getSize(), 4) + 4 * idx;
@@ -244,7 +246,7 @@ result_t Reader::getU32ByIdx(u32* out, u32 idx) const {
 
 result_t Reader::getS64ByIdx(s64* out, u32 idx) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByIdx(&offset, idx, NodeType::S64);
 	if (r) return r;
@@ -256,7 +258,7 @@ result_t Reader::getS64ByIdx(s64* out, u32 idx) const {
 
 result_t Reader::getF64ByIdx(f64* out, u32 idx) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByIdx(&offset, idx, NodeType::F64);
 	if (r) return r;
@@ -268,7 +270,7 @@ result_t Reader::getF64ByIdx(f64* out, u32 idx) const {
 
 result_t Reader::getU64ByIdx(u64* out, u32 idx) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByIdx(&offset, idx, NodeType::U64);
 	if (r) return r;
@@ -385,7 +387,7 @@ result_t Reader::getU32ByKey(u32* out, const std::string& key) const {
 
 result_t Reader::getS64ByKey(s64* out, const std::string& key) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByKey(&offset, key, NodeType::S64);
 	if (r) return r;
@@ -397,7 +399,7 @@ result_t Reader::getS64ByKey(s64* out, const std::string& key) const {
 
 result_t Reader::getF64ByKey(f64* out, const std::string& key) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByKey(&offset, key, NodeType::F64);
 	if (r) return r;
@@ -409,7 +411,7 @@ result_t Reader::getF64ByKey(f64* out, const std::string& key) const {
 
 result_t Reader::getU64ByKey(u64* out, const std::string& key) const {
 	if (mHeader.mVersion < 3) return Error::InvalidVersion;
-	
+
 	const u8* offset;
 	result_t r = getNodeByKey(&offset, key, NodeType::U64);
 	if (r) return r;
