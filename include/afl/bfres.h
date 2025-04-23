@@ -1,5 +1,4 @@
-#ifndef BFRES_H
-#define BFRES_H
+#pragma once
 
 #include <vector>
 
@@ -16,5 +15,3 @@ private:
 	const std::vector<u8>& mContents;
 	util::ByteOrder mByteOrder;
 };
-
-#endif

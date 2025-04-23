@@ -1,5 +1,4 @@
-#ifndef BYML_COMMON_H
-#define BYML_COMMON_H
+#pragma once
 
 #include "afl/types.h"
 
@@ -30,5 +29,3 @@ enum Error : result_t {
 };
 
 } // namespace byml
-
-#endif

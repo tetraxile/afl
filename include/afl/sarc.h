@@ -1,5 +1,4 @@
-#ifndef SARC_H
-#define SARC_H
+#pragma once
 
 #include "afl/util.h"
 
@@ -37,5 +36,3 @@ private:
 	Header mHeader;
 	std::vector<File> mFiles;
 };
-
-#endif

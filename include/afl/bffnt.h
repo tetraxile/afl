@@ -1,5 +1,4 @@
-#ifndef BFFNT_H
-#define BFFNT_H
+#pragma once
 
 #include <vector>
 
@@ -75,5 +74,3 @@ private:
 	CWDH mCharWidth;
 	CMAP mCharMap;
 };
-
-#endif

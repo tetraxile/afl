@@ -1,5 +1,4 @@
-#ifndef BYML_READER_H
-#define BYML_READER_H
+#pragma once
 
 #include "afl/byml/common.h"
 #include "afl/util.h"
@@ -128,5 +127,3 @@ private:
 };
 
 } // namespace byml
-
-#endif

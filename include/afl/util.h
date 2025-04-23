@@ -1,5 +1,4 @@
-#ifndef UTIL_H
-#define UTIL_H
+#pragma once
 
 #include <filesystem>
 #include <string>
@@ -88,5 +87,3 @@ void writeF64LE(std::vector<u8>& buffer, size_t offset, f64 value);
 void writeString(std::vector<u8>& buffer, size_t offset, const std::string& str);
 void writeBytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes);
 } // namespace writer
-
-#endif

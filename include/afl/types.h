@@ -1,8 +1,6 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include <cstdint>
-#include <functional>
 
 using s8 = std::int8_t;
 using s16 = std::int16_t;
@@ -20,5 +18,3 @@ using f32 = float;
 using f64 = double;
 
 typedef s32 result_t;
-
-#endif
