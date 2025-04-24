@@ -1,5 +1,6 @@
 #include "afl/byml/writer.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace byml {
