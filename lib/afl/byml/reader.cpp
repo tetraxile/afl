@@ -20,10 +20,13 @@ result_t Reader::initHeader() {
 	mHeader.mStringValueTableOffset = reader::readU32(mFileData + 8, mHeader.mByteOrder);
 	assert(mHeader.mVersion == 2 || mHeader.mVersion == 3);
 
-	mHeader.mHashKeyTableSize =
-		reader::readU24(mFileData + mHeader.mHashKeyTableOffset + 1, mHeader.mByteOrder);
-	mHeader.mStringValueTableSize =
-		reader::readU24(mFileData + mHeader.mStringValueTableOffset + 1, mHeader.mByteOrder);
+	if (mHeader.mHashKeyTableOffset)
+		mHeader.mHashKeyTableSize =
+			reader::readU24(mFileData + mHeader.mHashKeyTableOffset + 1, mHeader.mByteOrder);
+
+	if (mHeader.mStringValueTableOffset)
+		mHeader.mStringValueTableSize =
+			reader::readU24(mFileData + mHeader.mStringValueTableOffset + 1, mHeader.mByteOrder);
 
 	return 0;
 }
