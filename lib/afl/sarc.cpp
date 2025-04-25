@@ -74,12 +74,12 @@ result_t SARC::readSFNT(const u8* offset) {
 	return 0;
 }
 
-const std::vector<std::string> SARC::getFilenames() {
-	std::vector<std::string> mFilenames;
+const std::unordered_set<std::string> SARC::getFilenames() {
+	std::unordered_set<std::string> filenames;
 	for (const File& file : mFiles)
-		mFilenames.push_back(file.mName);
+		filenames.insert(file.mName);
 
-	return mFilenames;
+	return filenames;
 }
 
 result_t SARC::saveFile(const std::string& outDir, const std::string& filename) {
