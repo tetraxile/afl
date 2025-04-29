@@ -1,6 +1,7 @@
 #include "afl/sarc.h"
 
 #include <cassert>
+#include <filesystem>
 
 result_t SARC::read() {
 	result_t r;
@@ -89,6 +90,9 @@ result_t SARC::saveFile(const std::string& outDir, const std::string& filename) 
 	for (const File& file : mFiles) {
 		if (!util::isEqual(file.mName, filename)) continue;
 
+		fs::path filePath = basePath / file.mName;
+		fs::create_directories(filePath.parent_path().c_str());
+
 		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
 		u32 size = file.mEndOffset - file.mStartOffset;
 		std::vector<u8> contents = reader::readBytes(offset, size);
@@ -100,14 +104,19 @@ result_t SARC::saveFile(const std::string& outDir, const std::string& filename) 
 }
 
 result_t SARC::saveAll(const std::string& outDir) {
+	result_t r;
+
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
 	for (const File& file : mFiles) {
+		fs::path filePath = basePath / file.mName;
+		fs::create_directories(filePath.parent_path().c_str());
+
 		const u8* offset = &mContents[0] + mHeader.mDataOffset + file.mStartOffset;
 		u32 size = file.mEndOffset - file.mStartOffset;
 		std::vector<u8> contents = reader::readBytes(offset, size);
-		util::writeFile(basePath / file.mName, contents);
+		util::writeFile(filePath, contents);
 	}
 
 	return 0;
