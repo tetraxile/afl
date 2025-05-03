@@ -16,6 +16,7 @@ enum Error : result_t {
 	FileError,
 	FileNotFound,
 	DirNotFound,
+	HeaderSizeMismatch,
 };
 
 enum class ByteOrder {
@@ -40,10 +41,11 @@ inline void hashCombine(size_t& s, const T& v) {
 } // namespace util
 
 namespace reader {
-result_t readByteOrder(util::ByteOrder* out, const u8* offset, u16 expectedBE);
-result_t checkSignature(const u8* offset, const std::string& expected, size_t length);
 u8 readU8(const u8* offset);
+s8 readS8(const u8* offset);
 u16 readU16(const u8* offset, util::ByteOrder byteOrder);
+s16 readS16(const u8* offset, util::ByteOrder byteOrder);
+f16 readF16(const u8* offset, util::ByteOrder byteOrder);
 u32 readU24(const u8* offset, util::ByteOrder byteOrder);
 u32 readU32(const u8* offset, util::ByteOrder byteOrder);
 s32 readS32(const u8* offset, util::ByteOrder byteOrder);
@@ -51,6 +53,30 @@ f32 readF32(const u8* offset, util::ByteOrder byteOrder);
 u64 readU64(const u8* offset, util::ByteOrder byteOrder);
 s64 readS64(const u8* offset, util::ByteOrder byteOrder);
 f64 readF64(const u8* offset, util::ByteOrder byteOrder);
+
+u16 readU16BE(const u8* offset);
+u16 readU16LE(const u8* offset);
+s16 readS16BE(const u8* offset);
+s16 readS16LE(const u8* offset);
+f16 readF16BE(const u8* offset);
+f16 readF16LE(const u8* offset);
+u32 readU24BE(const u8* offset);
+u32 readU24LE(const u8* offset);
+u32 readU32BE(const u8* offset);
+u32 readU32LE(const u8* offset);
+s32 readS32BE(const u8* offset);
+s32 readS32LE(const u8* offset);
+f32 readF32BE(const u8* offset);
+f32 readF32LE(const u8* offset);
+u64 readU64BE(const u8* offset);
+u64 readU64LE(const u8* offset);
+s64 readS64BE(const u8* offset);
+s64 readS64LE(const u8* offset);
+f64 readF64BE(const u8* offset);
+f64 readF64LE(const u8* offset);
+
+result_t readByteOrder(util::ByteOrder* out, const u8* offset, u16 expectedBE);
+result_t checkSignature(const u8* offset, const std::string& expected, size_t length);
 std::string readString(const u8* offset);
 std::string readString(const u8* offset, size_t length);
 std::vector<u8> readBytes(const u8* offset, size_t size);

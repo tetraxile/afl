@@ -11,6 +11,7 @@ constexpr const char* resultToString(result_t r) {
 	case util::Error::FileError: return "file error";
 	case util::Error::FileNotFound: return "file not found";
 	case util::Error::DirNotFound: return "directory not found";
+	case util::Error::HeaderSizeMismatch: return "header size mismatch";
 	case byml::Error::WrongNodeType: return "byml: wrong node type";
 	case byml::Error::InvalidKey: return "byml: invalid key";
 	case byml::Error::OutOfBounds: return "byml: out of bounds";

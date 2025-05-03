@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "float16_t/float16_t.hpp"
+
 using s8 = std::int8_t;
 using s16 = std::int16_t;
 using s32 = std::int32_t;
@@ -15,6 +17,7 @@ using u64 = std::uint64_t;
 
 using size_t = std::size_t;
 
+using f16 = numeric::float16_t;
 using f32 = float;
 using f64 = double;
 

@@ -81,48 +81,140 @@ u8 readU8(const u8* offset) {
 	return *offset;
 }
 
+s8 readS8(const u8* offset) {
+	return std::bit_cast<s8>(readU8(offset));
+}
+
+u16 readU16BE(const u8* offset) {
+	return (offset[0] << 8) | (offset[1] << 0);
+}
+
+u16 readU16LE(const u8* offset) {
+	return (offset[0] << 0) | (offset[1] << 8);
+}
+
 u16 readU16(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		return (offset[0] << 8) | (offset[1] << 0);
+		return readU16BE(offset);
 	else
-		return (offset[0] << 0) | (offset[1] << 8);
+		return readU16LE(offset);
+}
+
+s16 readS16BE(const u8* offset) {
+	return std::bit_cast<s16>(readU16BE(offset));
+}
+
+s16 readS16LE(const u8* offset) {
+	return std::bit_cast<s16>(readU16LE(offset));
+}
+
+s16 readS16(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<s16>(readU16(offset, byteOrder));
+}
+
+f16 readF16BE(const u8* offset) {
+	return std::bit_cast<f16>(readU16BE(offset));
+}
+
+f16 readF16LE(const u8* offset) {
+	return std::bit_cast<f16>(readU16LE(offset));
+}
+
+f16 readF16(const u8* offset, util::ByteOrder byteOrder) {
+	return std::bit_cast<f16>(readU16(offset, byteOrder));
+}
+
+u32 readU24BE(const u8* offset) {
+	return (offset[0] << 16) | (offset[1] << 8) | (offset[2] << 0);
+}
+
+u32 readU24LE(const u8* offset) {
+	return (offset[0] << 0) | (offset[1] << 8) | (offset[2] << 16);
 }
 
 u32 readU24(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		return (offset[0] << 16) | (offset[1] << 8) | (offset[2] << 0);
+		return readU24BE(offset);
 	else
-		return (offset[0] << 0) | (offset[1] << 8) | (offset[2] << 16);
+		return readU24LE(offset);
+}
+
+u32 readU32BE(const u8* offset) {
+	return (offset[0] << 24) | (offset[1] << 16) | (offset[2] << 8) | offset[3];
+}
+
+u32 readU32LE(const u8* offset) {
+	return offset[0] | (offset[1] << 8) | (offset[2] << 16) | (offset[3] << 24);
 }
 
 u32 readU32(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		return (offset[0] << 24) | (offset[1] << 16) | (offset[2] << 8) | offset[3];
+		return readU32BE(offset);
 	else
-		return offset[0] | (offset[1] << 8) | (offset[2] << 16) | (offset[3] << 24);
+		return readU32LE(offset);
+}
+
+s32 readS32BE(const u8* offset) {
+	return std::bit_cast<s32>(readU32BE(offset));
+}
+
+s32 readS32LE(const u8* offset) {
+	return std::bit_cast<s32>(readU32LE(offset));
 }
 
 s32 readS32(const u8* offset, util::ByteOrder byteOrder) {
 	return std::bit_cast<s32>(readU32(offset, byteOrder));
 }
 
+f32 readF32BE(const u8* offset) {
+	return std::bit_cast<f32>(readU32BE(offset));
+}
+
+f32 readF32LE(const u8* offset) {
+	return std::bit_cast<f32>(readU32LE(offset));
+}
+
 f32 readF32(const u8* offset, util::ByteOrder byteOrder) {
 	return std::bit_cast<f32>(readU32(offset, byteOrder));
 }
 
+u64 readU64BE(const u8* offset) {
+	return ((u64)offset[0] << 56) | ((u64)offset[1] << 48) | ((u64)offset[2] << 40) |
+	       ((u64)offset[3] << 32) | ((u64)offset[4] << 24) | ((u64)offset[5] << 16) |
+	       ((u64)offset[6] << 8) | ((u64)offset[7] << 0);
+}
+
+u64 readU64LE(const u8* offset) {
+	return ((u64)offset[0] << 0) | ((u64)offset[1] << 8) | ((u64)offset[2] << 16) |
+	       ((u64)offset[3] << 24) | ((u64)offset[4] << 32) | ((u64)offset[5] << 40) |
+	       ((u64)offset[6] << 48) | ((u64)offset[7] << 56);
+}
+
 u64 readU64(const u8* offset, util::ByteOrder byteOrder) {
 	if (byteOrder == util::ByteOrder::Big)
-		return ((u64)offset[0] << 56) | ((u64)offset[1] << 48) | ((u64)offset[2] << 40) |
-		       ((u64)offset[3] << 32) | ((u64)offset[4] << 24) | ((u64)offset[5] << 16) |
-		       ((u64)offset[6] << 8) | ((u64)offset[7] << 0);
+		return readU64BE(offset);
 	else
-		return ((u64)offset[0] << 0) | ((u64)offset[1] << 8) | ((u64)offset[2] << 16) |
-		       ((u64)offset[3] << 24) | ((u64)offset[4] << 32) | ((u64)offset[5] << 40) |
-		       ((u64)offset[6] << 48) | ((u64)offset[7] << 56);
+		return readU64LE(offset);
+}
+
+s64 readS64BE(const u8* offset) {
+	return std::bit_cast<s64>(readU64BE(offset));
+}
+
+s64 readS64LE(const u8* offset) {
+	return std::bit_cast<s64>(readU64LE(offset));
 }
 
 s64 readS64(const u8* offset, util::ByteOrder byteOrder) {
 	return std::bit_cast<s64>(readU64(offset, byteOrder));
+}
+
+f64 readF64BE(const u8* offset) {
+	return std::bit_cast<f64>(readU64BE(offset));
+}
+
+f64 readF64LE(const u8* offset) {
+	return std::bit_cast<f64>(readU64LE(offset));
 }
 
 f64 readF64(const u8* offset, util::ByteOrder byteOrder) {

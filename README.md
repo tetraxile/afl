@@ -20,3 +20,7 @@ mkdir build && cd build
 cmake ..
 make
 ```
+
+## Credits
+
+* [float16_t](https://github.com/fengwang/float16_t) for 16-bit floats
