@@ -109,22 +109,21 @@ offset | size | type                 | description
 offset | size | type                 | description
 -------+------+----------------------+------------------------------------
 0x00   | 0x04 | char[4]              | signature 'FVTX'
-0x04   | 0x0c |                      | padding
+0x04   | 0x0c |                      | 
 0x10   | 0x08 | VertexAttrib*        | vertex attribute array offset
 0x18   | 0x08 | nn::util::ResDic*    | vertex attribute dict offset
 0x20   | 0x08 | nn::gfx::TMemoryPool | runtime memory pool offset
-0x28   | 0x08 | void*                | 
-0x30   | 0x08 | void*                | 
-0x38   | 0x08 | u64*                 | vertex buffer size offset
-0x40   | 0x08 | u64*                 | vertex buffer stride offset
-0x48   | 0x08 |                      | padding?
+0x28   | 0x08 | void*                | runtime vertex buffer array offset (size: 0x48 each)
+0x30   | 0x08 | void*                | runtime user vertex buffer array
+0x38   | 0x08 | u32*                 | vertex buffer size offset (size: 0x10 each)
+0x40   | 0x08 | u32*                 | vertex buffer stride offset (size: 0x10 each)
+0x48   | 0x08 |                      | 
 0x50   | 0x04 | u32                  | vertex buffer offset
 0x54   | 0x01 | u8                   | vertex attribute count
 0x55   | 0x01 | u8                   | vertex buffer count
 0x56   | 0x02 | u16                  | vertex index?
-0x58   | 0x04 | u32                  | vertex buffer vertex count
-0x5c   | 0x02 | u16                  | vertex skin count?
-0x5e   | 0x02 | u16                  | vertex gpu buffer alignment?
+0x58   | 0x04 | u32                  | vertex count
+0x5c   | 0x04 | u32                  | skin weight influence
 0x60   |      |                      | end
 
 
@@ -132,11 +131,11 @@ offset | size | type                 | description
 
 offset | size | type                 | description
 -------+------+----------------------+---------------
-0x00   | 0x08 | nn::util::ResString* | name offset
-0x08   | 0x02 | u16                  | format
+0x00   | 0x08 | nn::util::ResString* | offset of name (_p0, _n0, _u0, etc.)
+0x08   | 0x02 | u16                  | attribute format
 0x0a   | 0x02 |                      | padding?
 0x0c   | 0x02 | u16                  | offset
-0x0e   | 0x02 | u16                  | buffer index
+0x0e   | 0x02 | u16                  | index of object vertex buffer to use
 0x10   |      |                      | end
 
 
@@ -191,7 +190,7 @@ offset | size | type                    | description
 offset | size | type | description
 -------+------+------+--------------
 0x00   | 0x04 | u32  | offset
-0x04   | 0x04 | u32  | count
+0x04   | 0x04 | u32  | size
 0x08   |      |      | end
 
 
@@ -329,9 +328,9 @@ offset | size | type                        | description
 
 offset | size | type | description
 -------+------+------+--------------
-0x00   | 0x04 | u32  | buffer size
-0x04   | 0x04 | u32  | flags
-0x08   | 0x08 |      | padding?
+0x00   | 0x04 | u32  | flags?
+0x04   | 0x04 | u32  | buffer size
+0x08   | 0x08 | u64  | buffer offset
 0x10   |      |      | end
 
 
@@ -429,41 +428,3 @@ offset | size | type    | description
 0x18   | 0x04 | u32     | offset of relocation table relative to this header
 0x1c   | 0x04 | u32     | file size
 0x20   |      |         | end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-===== HEADER =====
-
-      0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-0x00 |           signature           |    version    |  bom  |aln|tgt|
-     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-0x10 |   filename    |is_rloc| block |  reloc table  |   file size   |
-     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-0x20 |        filename length        |          FMDL offset          |
-     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-0x30 |       FMDL dict offset        |                               |
-     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-
-
-
