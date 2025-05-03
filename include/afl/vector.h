@@ -17,11 +17,25 @@ template <typename T>
 struct Vector3 {
 	T x, y, z;
 
-	bool isEqual(const Vector3<T>& other) const { return x == other.x && y == other.y && z == other.z; }
+	bool isEqual(const Vector3<T>& other) const {
+		return x == other.x && y == other.y && z == other.z;
+	}
 };
 
 using Vector3i = Vector3<s32>;
 using Vector3f = Vector3<f32>;
+
+template <typename T>
+struct Vector4 {
+	T x, y, z, w;
+
+	bool isEqual(const Vector4<T>& other) const {
+		return x == other.x && y == other.y && z == other.z && w == other.w;
+	}
+};
+
+using Vector4i = Vector4<s32>;
+using Vector4f = Vector4<f32>;
 
 template <typename T>
 struct std::hash<Vector2<T>> {
