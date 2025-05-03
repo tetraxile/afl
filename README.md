@@ -24,4 +24,4 @@ make
 ## Credits
 
 * [float16_t](https://github.com/fengwang/float16_t) for 16-bit floats
-* [cgltf](https://github.com/jkuhlmann/cgltf) for glTF format support
+* [tinygltf](https://github.com/syoyo/tinygltf) for glTF format support
