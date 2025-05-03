@@ -15,6 +15,6 @@ endif()
 
 include_directories(include)
 
-set(SOURCES lib/afl/bffnt.cpp lib/afl/bfres.cpp lib/afl/bntx.cpp lib/afl/byml/reader.cpp lib/afl/byml/writer.cpp lib/afl/sarc.cpp lib/afl/util.cpp lib/afl/yaz0.cpp)
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/lib/*.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
