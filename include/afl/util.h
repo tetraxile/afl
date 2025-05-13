@@ -31,6 +31,7 @@ bool isEqual(std::string str1, std::string str2);
 u32 roundUp(u32 x, u32 powerOf2);
 s32 readFile(std::vector<u8>& contents, const fs::path& filename);
 void writeFile(const fs::path& filename, const std::vector<u8>& contents);
+void writeFile(const fs::path& filename, const std::string& contents);
 
 template <class T>
 inline void hashCombine(size_t& s, const T& v) {

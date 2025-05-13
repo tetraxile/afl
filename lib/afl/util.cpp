@@ -55,6 +55,11 @@ void writeFile(const fs::path& filename, const std::vector<u8>& contents) {
 	fstream.write(reinterpret_cast<const char*>(contents.data()), contents.size());
 }
 
+void writeFile(const fs::path& filename, const std::string& contents) {
+	std::ofstream fstream(filename, std::ios::out);
+	fstream.write(contents.c_str(), contents.size());
+}
+
 } // namespace util
 
 namespace reader {
