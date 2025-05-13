@@ -48,14 +48,11 @@ result_t FVTX::read(const u8* offset) {
 }
 
 result_t VertexAttribute::read(const u8* offset) {
-	u64 nameOffset = reader::readU64(offset, mByteOrder);
+	mName = readString(offset);
 	mFormat = AttributeFormat(reader::readU32(offset + 0x8, mByteOrder));
 	mBufferOffset = reader::readU16(offset + 0xc, mByteOrder);
 	mBufferIdx = reader::readU8(offset + 0xe);
 	mIsDynamic = reader::readU8(offset + 0xf);
-
-	u16 nameLen = reader::readU16(mBase + nameOffset, mByteOrder);
-	mName = reader::readString(mBase + nameOffset + 2, nameLen);
 
 	printf("\t\t\tname: %s\n", mName.c_str());
 	printf("\t\t\tformat: %x\n", (u32)mFormat);

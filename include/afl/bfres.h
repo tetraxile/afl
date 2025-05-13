@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <format>
 #include <vector>
 
 #include "afl/util.h"
@@ -103,6 +104,28 @@ enum class IndexFormat : u32 {
 	U32,
 };
 
+// TODO: try different values and see what these look like
+enum class WrapMode : u8 {
+	Repeat,
+	Mirror,
+	Clamp,
+	ClampToEdge,
+	MirrorOnce,
+	MirrorOnceClampToEdge,
+};
+
+// TODO: try different values and see what these look like
+enum class CompareFunc : u8 {
+	Never,
+	Less,
+	Equal,
+	LessEqual,
+	Greater,
+	NotEqual,
+	GreaterEqual,
+	Always,
+};
+
 result_t readAttrFormat(
 	Vector4f* out, const u8* offset, AttributeFormat fmt, util::ByteOrder byteOrder
 );
@@ -119,7 +142,10 @@ public:
 	virtual result_t read(const u8* offset) = 0;
 	virtual u32 size() const = 0;
 
+	virtual std::string toString() const { return typeid(this).name(); }
+
 	result_t readHeader(const u8* offset, const std::string& signature);
+	std::string readString(const u8* offset);
 
 protected:
 	const Reader* mFile;
@@ -135,6 +161,20 @@ concept IsDataNode = requires(T t) {
 
 template <IsDataNode T>
 class Dict {
+private:
+	struct Node {
+		const static u32 cSize = 0x10;
+
+		Node(s32 ref, u16 left, u16 right, const std::string key, T* value) :
+			reference(ref), idxLeft(left), idxRight(right), key(key), value(value) {}
+
+		s32 reference;
+		u16 idxLeft;
+		u16 idxRight;
+		const std::string key;
+		T* value = nullptr;
+	};
+
 public:
 	Dict(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
 		mFile(file), mBase(base), mByteOrder(byteOrder) {}
@@ -159,24 +199,20 @@ public:
 		return 0;
 	}
 
+	void print(s32 indent = 0) const {
+		std::string indentStr(indent, '\t');
+		for (const Node* node : mNodes) {
+			printf(
+				"%s%s: %s\n", indentStr.c_str(), node->key.c_str(), node->value->toString().c_str()
+			);
+		}
+	}
+
 	T* getValue(s32 idx) { return mNodes.at(idx)->value; }
 
 	size_t getNodeCount() const { return mNodes.size(); }
 
 private:
-	struct Node {
-		const static u32 cSize = 0x10;
-
-		Node(s32 ref, u16 left, u16 right, const std::string key, T* value) :
-			reference(ref), idxLeft(left), idxRight(right), key(key), value(value) {}
-
-		s32 reference;
-		u16 idxLeft;
-		u16 idxRight;
-		const std::string key;
-		T* value;
-	};
-
 	result_t readNode(const u8* nodeOffset, const u8* valueOffset, bool isRoot = false) {
 		result_t r;
 
@@ -187,8 +223,6 @@ private:
 
 		u16 keyLen = reader::readU16(mBase + keyOffset, mByteOrder);
 		std::string key = reader::readString(mBase + keyOffset + 2, keyLen);
-
-		// printf("dict node: (%s, %s)\n", key.c_str(), typeid(T).name());
 
 		if (isRoot) {
 			assert(reference == -1);
@@ -207,8 +241,27 @@ private:
 	const u8* mBase;
 	const util::ByteOrder mByteOrder;
 
-	Node* mRootNode;
+	Node* mRootNode = nullptr;
 	std::vector<Node*> mNodes;
+};
+
+struct String : public DataNode {
+	String(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override {
+		mValue = readString(offset);
+		// printf("str: %s\n", mValue.c_str());
+		return 0;
+	}
+
+	std::string toString() const override { return mValue; }
+
+	const static u32 cSize = 0x8;
+
+	u32 size() const override { return cSize; }
+
+	std::string mValue;
 };
 
 class BufferInfo : public DataNode {
@@ -273,11 +326,11 @@ public:
 
 	// private:
 	std::vector<VertexBuffer*> mBuffers;
-	Dict<VertexAttribute>* mAttrs;
-	u64 mMemoryPoolOffset;
-	u16 mIndex;
-	u32 mVertexCount;
-	u32 mSkinWeightInfluence;
+	Dict<VertexAttribute>* mAttrs = nullptr;
+	u64 mMemoryPoolOffset = 0;
+	u16 mIndex = 0;
+	u32 mVertexCount = 0;
+	u32 mSkinWeightInfluence = 0;
 };
 
 struct SubMesh {
@@ -298,8 +351,7 @@ public:
 
 	result_t read(const u8* offset) override;
 
-	// TODO
-	const static u32 cSize = 0x0;
+	const static u32 cSize = 0x38;
 
 	u32 size() const override { return cSize; }
 
@@ -308,9 +360,9 @@ public:
 
 	PrimitiveType mPrimType;
 	IndexFormat mIdxFormat;
-	u32 mIdxCount;
-	u32 mFirstVertexIdx;
-	u64 mMemoryPoolOffset;
+	u32 mIdxCount = 0;
+	u32 mFirstVertexIdx = 0;
+	u64 mMemoryPoolOffset = 0;
 };
 
 class FSHP : public DataNode {
@@ -333,7 +385,139 @@ public:
 private:
 	std::vector<Mesh*> mMeshes;
 	std::string mName;
-	u16 mVtxBufferIdx;
+	u16 mVtxBufferIdx = 0;
+};
+
+class RenderInfo : public DataNode {
+private:
+	enum DataType : u8 {
+		S32 = 0,
+		F32 = 1,
+		String = 2,
+	};
+
+	struct Data {
+		Data(DataType type) : type(type) {}
+
+		virtual ~Data() = default;
+
+		DataType type;
+	};
+
+	struct DataS32 : public Data {
+		DataS32(s32 value) : Data(S32), value(value) {}
+
+		s32 value;
+	};
+
+	struct DataF32 : public Data {
+		DataF32(f32 value) : Data(F32), value(value) {}
+
+		f32 value;
+	};
+
+	struct DataStr : public Data {
+		DataStr(std::string value) : Data(String), value(value) {}
+
+		std::string value;
+	};
+
+public:
+	RenderInfo(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override;
+
+	const static u32 cSize = 0x18;
+
+	u32 size() const override { return cSize; }
+
+	std::string toString() const override {
+		std::string str = std::format("{} (", mName);
+		for (const Data* data : mData) {
+			if (data->type == S32)
+				str += std::format("{}, ", static_cast<const DataS32*>(data)->value);
+			else if (data->type == F32)
+				str += std::format("{}, ", static_cast<const DataF32*>(data)->value);
+			else if (data->type == String) {
+				str += std::format("{}, ", static_cast<const DataStr*>(data)->value);
+			}
+		}
+		str += ")";
+		return str;
+	}
+
+private:
+	std::string mName;
+	std::vector<Data*> mData;
+};
+
+class ShaderAssign : public DataNode {
+public:
+	ShaderAssign(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override;
+
+	const static u32 cSize = 0x48;
+
+	u32 size() const override { return cSize; }
+
+	// private:
+	std::string mShaderArcName;
+	std::string mShadingModelName;
+	u32 mRevision = 0;
+	Dict<String>* mAttrAssigns = nullptr;
+	Dict<String>* mSamplerAssigns = nullptr;
+	Dict<String>* mShaderOptions = nullptr;
+};
+
+class Sampler : public DataNode {
+public:
+	Sampler(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override;
+
+	const static u32 cSize = 0x20;
+
+	u32 size() const override { return cSize; }
+};
+
+class ShaderParam : public DataNode {
+public:
+	ShaderParam(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override;
+
+	const static u32 cSize = 0x20;
+
+	u32 size() const override { return cSize; }
+
+private:
+	std::string mName;
+};
+
+class FMAT : public DataNode {
+public:
+	FMAT(const Reader* file, const u8* base, const util::ByteOrder byteOrder) :
+		DataNode(file, base, byteOrder) {}
+
+	result_t read(const u8* offset) override;
+
+	const static u32 cSize = 0xb8;
+
+	u32 size() const override { return cSize; }
+
+	std::string getName() const { return mName; }
+
+	// private:
+	std::string mName;
+	ShaderAssign* mShaderAssign = nullptr;
+	Dict<RenderInfo>* mRenderInfos = nullptr;
+	Dict<Sampler>* mSamplers = nullptr;
+	Dict<ShaderParam>* mShaderParams = nullptr;
 };
 
 class FMDL : public DataNode {
@@ -349,19 +533,24 @@ public:
 
 	const std::string& getName() const { return mName; }
 
-	FSHP* getShape(s32 idx) const { return mShapes->getValue(idx); }
-
 	FVTX* getVtxBuffer(s32 idx) const { return mVtxBuffers.at(idx); }
 
-	size_t getShapeCount() const { return mShapes->getNodeCount(); }
+	FSHP* getShape(s32 idx) const { return mShapes ? mShapes->getValue(idx) : nullptr; }
+
+	size_t getShapeCount() const { return mShapes ? mShapes->getNodeCount() : 0; }
+
+	FMAT* getMaterial(s32 idx) { return mMaterials ? mMaterials->getValue(idx) : nullptr; }
+
+	size_t getMaterialCount() const { return mMaterials ? mMaterials->getNodeCount() : 0; }
 
 private:
 	std::vector<FVTX*> mVtxBuffers;
-	Dict<FSHP>* mShapes;
+	Dict<FSHP>* mShapes = nullptr;
+	Dict<FMAT>* mMaterials = nullptr;
 
 	std::string mName;
 	std::string mPathName;
-	u32 mTotalVtxCount;
+	u32 mTotalVtxCount = 0;
 };
 
 class Reader {
@@ -373,9 +562,9 @@ public:
 	result_t readHeader(const u8* offset);
 	result_t exportGLTF(const fs::path& output);
 
-	FMDL* getModel(s32 idx) const { return mModels->getValue(idx); }
+	FMDL* getModel(s32 idx) const { return mModels ? mModels->getValue(idx) : nullptr; }
 
-	size_t getModelCount() const { return mModels->getNodeCount(); }
+	size_t getModelCount() const { return mModels ? mModels->getNodeCount() : 0; }
 
 	u32 getGPUBufferSize() const { return mBufferInfo->getBufferSize(); }
 
@@ -386,8 +575,8 @@ private:
 	const u8* mBase;
 	util::ByteOrder mByteOrder;
 
-	BufferInfo* mBufferInfo;
-	Dict<FMDL>* mModels;
+	BufferInfo* mBufferInfo = nullptr;
+	Dict<FMDL>* mModels = nullptr;
 };
 
 } // namespace bfres

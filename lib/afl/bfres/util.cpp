@@ -19,11 +19,17 @@ result_t DataNode::readHeader(const u8* offset, const std::string& signature) {
 	u32 nextBlockOffset = reader::readU32(offset + 0x4, mByteOrder);
 	u32 blockSize = reader::readU32(offset + 0x8, mByteOrder);
 
-	if (blockSize != size() && blockSize != 0) {
-		printf("info: %s block size %x (expected %x)\n", signature.c_str(), blockSize, size());
-	}
+	// if (blockSize != size() && blockSize != 0) {
+	// 	printf("info: %s block size %x (expected %x)\n", signature.c_str(), blockSize, size());
+	// }
 
 	return 0;
+}
+
+std::string DataNode::readString(const u8* offset) {
+	u64 strOffset = reader::readU64(offset, mByteOrder);
+	u16 len = reader::readU16(mBase + strOffset, mByteOrder);
+	return reader::readString(mBase + strOffset + 2, len);
 }
 
 u32 getIndexFormatStride(IndexFormat fmt) {

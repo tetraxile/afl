@@ -208,7 +208,7 @@ offset | size | type                        | description
 0x10   | 0x08 | nn::util::ResString*        | name offset
 0x18   | 0x08 | RenderInfo*                 | render info array offset
 0x20   | 0x08 | nn::gfx::ResDic*            | render info dict offset
-0x28   | 0x08 | ShaderAssign*               | shader assign offset
+0x28   | 0x08 | ResShaderAssign*            | shader assign offset
 0x30   | 0x08 |                             | texture array offset
 0x38   | 0x08 |                             | texture name array offset
 0x40   | 0x08 |                             | sampler array offset

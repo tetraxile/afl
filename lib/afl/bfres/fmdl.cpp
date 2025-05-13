@@ -7,8 +7,8 @@ result_t FMDL::read(const u8* offset) {
 	r = readHeader(offset, "FMDL");
 	if (r) return r;
 
-	u64 nameOffset = reader::readU64(offset + 0x10, mByteOrder);
-	u64 pathNameOffset = reader::readU64(offset + 0x18, mByteOrder);
+	mName = readString(offset + 0x10);
+	mPathName = readString(offset + 0x18);
 	u64 sklOffset = reader::readU64(offset + 0x20, mByteOrder);
 	u64 vtxBufOffset = reader::readU64(offset + 0x28, mByteOrder);
 	u64 shpArrayOffset = reader::readU64(offset + 0x30, mByteOrder);
@@ -22,12 +22,6 @@ result_t FMDL::read(const u8* offset) {
 	u16 userDataCount = reader::readU16(offset + 0x6e, mByteOrder);
 	mTotalVtxCount = reader::readU32(offset + 0x70, mByteOrder);
 
-	u16 nameLen = reader::readU16(mBase + nameOffset, mByteOrder);
-	mName = reader::readString(mBase + nameOffset + 2, nameLen);
-
-	u16 pathNameLen = reader::readU16(mBase + pathNameOffset, mByteOrder);
-	mPathName = reader::readString(mBase + pathNameOffset + 2, pathNameLen);
-
 	printf("\tname: %s\n", mName.c_str());
 	printf("\n");
 
@@ -37,7 +31,7 @@ result_t FMDL::read(const u8* offset) {
 	}
 
 	if (vtxBufCount) {
-		printf("\tvertex buffers: %d\n", vtxBufCount);
+		printf("\tvertex buffers: %d (%#lx)\n", vtxBufCount, vtxBufOffset);
 		printf("\tentries:\n");
 		for (u16 i = 0; i < vtxBufCount; i++) {
 			FVTX* vtxBuffer = new FVTX(mFile, mBase, mByteOrder);
@@ -49,7 +43,7 @@ result_t FMDL::read(const u8* offset) {
 	}
 
 	if (shpCount) {
-		printf("\tshapes: %d\n", shpCount);
+		printf("\tshapes: %d (%#lx, %#lx)\n", shpCount, shpArrayOffset, shpDictOffset);
 		printf("\tentries:\n");
 		mShapes = new Dict<FSHP>(mFile, mBase, mByteOrder);
 		r = mShapes->read(shpDictOffset, shpArrayOffset);
@@ -58,14 +52,11 @@ result_t FMDL::read(const u8* offset) {
 	}
 
 	if (matCount) {
-		printf("\tmaterials:\n");
-		printf("\t\tarray offset: %lx\n", matArrayOffset);
-		printf("\t\tdict offset: %lx\n", matDictOffset);
-		printf("\t\tcount: %d\n", matCount);
+		printf("\tmaterials: %d (%#lx, %#lx)\n", matCount, matArrayOffset, matDictOffset);
 		printf("\tentries:\n");
-		for (u16 i = 0; i < matCount; i++) {
-			printf("\t\tmaterial:\n");
-		}
+		mMaterials = new Dict<FMAT>(mFile, mBase, mByteOrder);
+		r = mMaterials->read(matDictOffset, matArrayOffset);
+		if (r) return r;
 		printf("\n");
 	}
 

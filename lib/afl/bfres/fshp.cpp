@@ -7,7 +7,7 @@ result_t FSHP::read(const u8* offset) {
 	r = readHeader(offset, "FSHP");
 	if (r) return r;
 
-	u64 nameOffset = reader::readU64(offset + 0x10, mByteOrder);
+	mName = readString(offset + 0x10);
 	u64 vtxBufferOffset = reader::readU64(offset + 0x18, mByteOrder);
 	u64 meshArrayOffset = reader::readU64(offset + 0x20, mByteOrder);
 	u64 skinBoneIdxArrayOffset = reader::readU64(offset + 0x28, mByteOrder);
@@ -27,8 +27,6 @@ result_t FSHP::read(const u8* offset) {
 	u8 keyShapeCount = reader::readU8(offset + 0x68);
 	u8 targetAttrCount = reader::readU8(offset + 0x69);
 
-	u16 nameLen = reader::readU16(mBase + nameOffset, mByteOrder);
-	mName = reader::readString(mBase + nameOffset + 2, nameLen);
 	printf("\t\tname: %s\n", mName.c_str());
 
 	printf("\t\tvtxBufferOffset: %lx\n", vtxBufferOffset);
