@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_set>
+#include <set>
 
 #include "afl/util.h"
 
@@ -27,7 +27,7 @@ public:
 	result_t readHeader(const u8* offset);
 	result_t readSFAT(const u8* offset);
 	result_t readSFNT(const u8* offset);
-	const std::unordered_set<std::string> getFilenames();
+	const std::set<std::string> getFilenames();
 	result_t saveFile(const std::string& outDir, const std::string& filename);
 	result_t saveAll(const std::string& outDir);
 	result_t getFileData(std::vector<u8>& out, const std::string& filename);
