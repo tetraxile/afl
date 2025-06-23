@@ -5,32 +5,31 @@
 
 namespace byml {
 
-void Writer::save(const std::string& filename, util::ByteOrder byteOrder) {
+void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 	if (byteOrder != util::ByteOrder::Little) {
-		fprintf(stderr, "unimplemented big-endian byml writer\n");
+		fprintf(stderr, "error: unimplemented big-endian byml writer\n");
 		return;
 	}
 
-	std::vector<u8> outputBuffer;
-	writer::writeU16LE(outputBuffer, 0, 0x4259);   // byte order mark
-	writer::writeU16LE(outputBuffer, 2, mVersion); // version
+	writer::writeU16LE(out, 0, 0x4259);   // byte order mark
+	writer::writeU16LE(out, 2, mVersion); // version
 
 	u32 hashKeyTableOffset = 0x10;
 	u32 valueStringTableOffset = hashKeyTableOffset + mHashKeyStringTable.calcSize();
 	u32 data64Offset = valueStringTableOffset + mValueStringTable.calcSize();
-	u32 rootOffset = data64Offset + mData64.size() * 8;
+	u32 rootOffset = util::roundUp(data64Offset + mData64.size() * 8, 4);
 
-	writer::writeU32LE(outputBuffer, 0x4, mHashKeyStringTable.isEmpty() ? 0 : hashKeyTableOffset);
-	writer::writeU32LE(outputBuffer, 0x8, mValueStringTable.isEmpty() ? 0 : valueStringTableOffset);
-	writer::writeU32LE(outputBuffer, 0xc, mContainerList.empty() ? 0 : rootOffset);
+	writer::writeU32LE(out, 0x4, mHashKeyStringTable.isEmpty() ? 0 : hashKeyTableOffset);
+	writer::writeU32LE(out, 0x8, mValueStringTable.isEmpty() ? 0 : valueStringTableOffset);
+	writer::writeU32LE(out, 0xc, mContainerList.empty() ? 0 : rootOffset);
 
-	mHashKeyStringTable.write(outputBuffer, hashKeyTableOffset);
-	mValueStringTable.write(outputBuffer, valueStringTableOffset);
+	mHashKeyStringTable.write(out, hashKeyTableOffset);
+	mValueStringTable.write(out, valueStringTableOffset);
 
 	u32 writePtr = data64Offset;
 	for (auto* node : mData64) {
 		node->setOffset(writePtr);
-		node->writeData64(outputBuffer, writePtr);
+		node->writeData64(out, writePtr);
 		writePtr += 8;
 	}
 
@@ -41,9 +40,13 @@ void Writer::save(const std::string& filename, util::ByteOrder byteOrder) {
 	}
 
 	for (Container* container : mContainerList) {
-		container->writeContainer(outputBuffer);
+		container->writeContainer(out);
 	}
+}
 
+void Writer::save(const std::string& filename, util::ByteOrder byteOrder) {
+	std::vector<u8> outputBuffer;
+	saveToVec(outputBuffer, byteOrder);
 	util::writeFile(filename, outputBuffer);
 }
 

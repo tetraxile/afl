@@ -214,7 +214,8 @@ private:
 public:
 	Writer(u32 version) : mVersion(version) {}
 
-	void save(const std::string& filename, util::ByteOrder byteOrder);
+	void saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder = util::ByteOrder::Little);
+	void save(const std::string& filename, util::ByteOrder byteOrder = util::ByteOrder::Little);
 
 	result_t pushArray();
 	result_t pushHash();
