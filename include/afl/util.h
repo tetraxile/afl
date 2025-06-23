@@ -78,8 +78,8 @@ f64 readF64LE(const u8* offset);
 
 result_t readByteOrder(util::ByteOrder* out, const u8* offset, u16 expectedBE);
 result_t checkSignature(const u8* offset, const std::string& expected, size_t length);
-std::string readString(const u8* offset);
-std::string readString(const u8* offset, size_t length);
+const std::string readString(const u8* offset);
+const std::string readString(const u8* offset, size_t length);
 std::vector<u8> readBytes(const u8* offset, size_t size);
 } // namespace reader
 

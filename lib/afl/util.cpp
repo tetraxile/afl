@@ -226,12 +226,12 @@ f64 readF64(const u8* offset, util::ByteOrder byteOrder) {
 	return std::bit_cast<f64>(readU64(offset, byteOrder));
 }
 
-std::string readString(const u8* offset) {
+const std::string readString(const u8* offset) {
 	std::string str((const char*)offset);
 	return str;
 }
 
-std::string readString(const u8* offset, size_t length) {
+const std::string readString(const u8* offset, size_t length) {
 	std::string str((const char*)offset, length);
 	return str;
 }
