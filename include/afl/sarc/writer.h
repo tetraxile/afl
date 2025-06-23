@@ -17,9 +17,10 @@ public:
 	void save(const std::string& filename, util::ByteOrder byteOrder = util::ByteOrder::Little);
 
 	void addFile(const std::string& filename, const std::vector<u8>& fileData);
-	u32 calcHash(const std::string& str) const;
 
 private:
+	u32 calcHash(const std::string& str) const;
+
 	const u16 mVersion;
 	const u32 mHashMultiplier = 101;
 
