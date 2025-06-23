@@ -63,12 +63,12 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 			hashes[filenameHash] = 1;
 		}
 		u8 hashCount = hashes[filenameHash];
-		u32 fileAttributes = (hashCount << 24) | ((sfntEntry >> 2) & 0xffffff);
+		u32 fileAttributes = (hashCount << 24) | (((sfntEntry - sfntEntryStart) >> 2) & 0xffffff);
 
 		writer::writeU32LE(out, sfatEntry + 0x00, filenameHash);
 		writer::writeU32LE(out, sfatEntry + 0x04, fileAttributes);
-		writer::writeU32LE(out, sfatEntry + 0x08, dataEntry);
-		writer::writeU32LE(out, sfatEntry + 0x0c, dataEntry + file.mData.size());
+		writer::writeU32LE(out, sfatEntry + 0x08, dataEntry - dataOffset);
+		writer::writeU32LE(out, sfatEntry + 0x0c, dataEntry - dataOffset + file.mData.size());
 
 		writer::writeString(out, sfntEntry, file.mName);
 		writer::writeBytes(out, dataEntry, file.mData);
