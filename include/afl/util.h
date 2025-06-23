@@ -111,6 +111,8 @@ void writeS64LE(std::vector<u8>& buffer, size_t offset, s64 value);
 void writeF64BE(std::vector<u8>& buffer, size_t offset, f64 value);
 void writeF64LE(std::vector<u8>& buffer, size_t offset, f64 value);
 
-void writeString(std::vector<u8>& buffer, size_t offset, const std::string& str);
+void writeString(
+	std::vector<u8>& buffer, size_t offset, const std::string& str, bool isNullTerminated = true
+);
 void writeBytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes);
 } // namespace writer

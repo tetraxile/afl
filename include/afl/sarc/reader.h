@@ -4,7 +4,9 @@
 
 #include "afl/util.h"
 
-class SARC {
+namespace sarc {
+
+class Reader {
 public:
 	struct Header {
 		util::ByteOrder mByteOrder;
@@ -21,10 +23,10 @@ public:
 		std::string mName;
 	};
 
-	SARC(const std::vector<u8>& fileContents) : mContents(fileContents) {}
+	Reader(const std::vector<u8>& fileContents) : mContents(fileContents) {}
 
-	result_t read();
-	result_t readHeader(const u8* offset);
+	result_t init();
+	result_t initHeader(const u8* offset);
 	result_t readSFAT(const u8* offset);
 	result_t readSFNT(const u8* offset);
 	const std::set<std::string> getFilenames();
@@ -38,3 +40,5 @@ private:
 	Header mHeader;
 	std::vector<File> mFiles;
 };
+
+} // namespace sarc

@@ -1,0 +1,76 @@
+SARC version 1.0
+
+SARC header, SFAT header, SFAT entries, SFNT header, SFNT entries and file data are stored right after each other.
+
+===== SARC header =====
+
+offset | size | type    | description
+-------+------+---------+------------------------
+0x00   | 0x04 | char[4] | signature ('SARC')
+0x04   | 0x02 | u16     | header size (0x14)
+0x06   | 0x02 | u16     | byte order mark (0xfeff = big, 0xfffe = little)
+0x08   | 0x04 | u32     | file size
+0x0c   | 0x04 | u32     | data offset
+0x10   | 0x02 | u16     | version (0x100)
+0x12   | 0x02 |         | padding
+0x14   |      |         | 
+
+
+===== SFAT header =====
+
+offset | size | type    | description
+-------+------+---------+------------------------
+0x00   | 0x04 | char[4] | signature ('SFAT')
+0x04   | 0x02 | u16     | header size (0xc)
+0x06   | 0x02 | u16     | number of files (up to 0x3fff)
+0x08   | 0x04 | u32     | hash multiplier (always 101)
+0x0c   |      |         | 
+
+
+===== SFAT entry =====
+
+offset | size | type    | description
+-------+------+---------+------------------------
+0x00   | 0x04 | u32     | filename hash
+0x04   | 0x04 | u32     | filename attributes
+0x08   | 0x04 | u32     | file start offset in data section
+0x0c   | 0x04 | u32     | file end offset in data section
+0x10   |      |         | 
+
+
+===== SFNT header =====
+
+offset | size | type    | description
+-------+------+---------+------------------------
+0x00   | 0x04 | char[4] | signature ('SFNT')
+0x04   | 0x02 | u16     | header size (0x8)
+0x06   | 0x02 |         | padding
+0x08   |      |         | 
+
+
+===== SFNT entry =====
+
+null-terminated string aligned to 4 bytes
+
+
+===== filename hash =====
+
+```
+def calculate_hash(filename, multiplier):
+    hash = 0
+    for byte in filename:
+        hash = hash * multiplier + byte
+    return hash & 0xFFFFFFFF
+```
+
+on switch, each byte of the filename is sign-extended.
+
+
+===== filename attributes =====
+
+if this field is zero, the archive contains exactly one file with the given hash and no filename is stored.
+
+otherwise, this field is stored as 0xAABBBBBB.
+for a given hash, AA starts at 1 and is incremented on every SFAT entry that has the same hash.
+in practice, AA is almost always 1 because the probability of hash collisions is quite low.
+BBBBBB is an offset into the filename table divided by 4.

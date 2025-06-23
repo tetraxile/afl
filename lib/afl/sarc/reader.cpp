@@ -1,11 +1,13 @@
-#include "afl/sarc.h"
+#include "afl/sarc/reader.h"
 
 #include <cassert>
 #include <filesystem>
 
-result_t SARC::read() {
+namespace sarc {
+
+result_t Reader::init() {
 	result_t r;
-	r = readHeader(&mContents[0]);
+	r = initHeader(&mContents[0]);
 	if (r) return r;
 
 	r = readSFAT(&mContents[0x14]);
@@ -17,7 +19,7 @@ result_t SARC::read() {
 	return 0;
 }
 
-result_t SARC::readHeader(const u8* offset) {
+result_t Reader::initHeader(const u8* offset) {
 	result_t r;
 	r = reader::checkSignature(offset, "SARC", 4);
 	if (r) return r;
@@ -35,7 +37,7 @@ result_t SARC::readHeader(const u8* offset) {
 	return 0;
 }
 
-result_t SARC::readSFAT(const u8* offset) {
+result_t Reader::readSFAT(const u8* offset) {
 	result_t r;
 	r = reader::checkSignature(offset, "SFAT", 4);
 	if (r) return r;
@@ -58,7 +60,7 @@ result_t SARC::readSFAT(const u8* offset) {
 	return 0;
 }
 
-result_t SARC::readSFNT(const u8* offset) {
+result_t Reader::readSFNT(const u8* offset) {
 	result_t r = reader::checkSignature(offset, "SFNT", 4);
 	if (r) return r;
 	u16 headerSize = reader::readU16(offset + 4, mHeader.mByteOrder);
@@ -75,7 +77,7 @@ result_t SARC::readSFNT(const u8* offset) {
 	return 0;
 }
 
-const std::set<std::string> SARC::getFilenames() {
+const std::set<std::string> Reader::getFilenames() {
 	std::set<std::string> filenames;
 	for (const File& file : mFiles)
 		filenames.insert(file.mName);
@@ -83,7 +85,7 @@ const std::set<std::string> SARC::getFilenames() {
 	return filenames;
 }
 
-result_t SARC::saveFile(const std::string& outDir, const std::string& filename) {
+result_t Reader::saveFile(const std::string& outDir, const std::string& filename) {
 	fs::path basePath(outDir);
 	fs::create_directory(basePath);
 
@@ -103,7 +105,7 @@ result_t SARC::saveFile(const std::string& outDir, const std::string& filename) 
 	return util::Error::FileNotFound;
 }
 
-result_t SARC::saveAll(const std::string& outDir) {
+result_t Reader::saveAll(const std::string& outDir) {
 	result_t r;
 
 	fs::path basePath(outDir);
@@ -122,7 +124,7 @@ result_t SARC::saveAll(const std::string& outDir) {
 	return 0;
 }
 
-result_t SARC::getFileData(std::vector<u8>& out, const std::string& filename) {
+result_t Reader::getFileData(std::vector<u8>& out, const std::string& filename) {
 	for (const File& file : mFiles) {
 		if (!util::isEqual(file.mName, filename)) continue;
 
@@ -135,7 +137,7 @@ result_t SARC::getFileData(std::vector<u8>& out, const std::string& filename) {
 	return util::Error::FileNotFound;
 }
 
-result_t SARC::getFileSize(u32* out, const std::string& filename) {
+result_t Reader::getFileSize(u32* out, const std::string& filename) {
 	for (const File& file : mFiles) {
 		if (!util::isEqual(file.mName, filename)) continue;
 
@@ -145,3 +147,5 @@ result_t SARC::getFileSize(u32* out, const std::string& filename) {
 
 	return util::Error::FileNotFound;
 }
+
+} // namespace sarc

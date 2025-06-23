@@ -399,10 +399,12 @@ void writeF64(std::vector<u8>& buffer, size_t offset, f64 value, util::ByteOrder
 	writeU64(buffer, offset, std::bit_cast<u64>(value), byteOrder);
 }
 
-void writeString(std::vector<u8>& buffer, size_t offset, const std::string& str) {
+void writeString(
+	std::vector<u8>& buffer, size_t offset, const std::string& str, bool isNullTerminated
+) {
 	for (size_t i = 0; i < str.size(); i++)
 		writeU8(buffer, offset + i, str[i]);
-	writeU8(buffer, offset + str.size(), 0);
+	if (isNullTerminated) writeU8(buffer, offset + str.size(), 0);
 }
 
 void writeBytes(std::vector<u8>& buffer, size_t offset, const std::vector<u8>& bytes) {
