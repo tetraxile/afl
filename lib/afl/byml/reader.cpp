@@ -16,9 +16,11 @@ result_t Reader::initHeader() {
 	if (r) return r;
 
 	mHeader.mVersion = reader::readU16(mFileData + 2, mHeader.mByteOrder);
+	assert(mHeader.mVersion == 2 || mHeader.mVersion == 3);
+
 	mHeader.mHashKeyTableOffset = reader::readU32(mFileData + 4, mHeader.mByteOrder);
 	mHeader.mStringValueTableOffset = reader::readU32(mFileData + 8, mHeader.mByteOrder);
-	assert(mHeader.mVersion == 2 || mHeader.mVersion == 3);
+	mHeader.mRootOffset = reader::readU32(mFileData + 0xc, mHeader.mByteOrder);
 
 	if (mHeader.mHashKeyTableOffset)
 		mHeader.mHashKeyTableSize =
@@ -39,23 +41,20 @@ result_t Reader::init(const u8* fileData) {
 	r = initHeader();
 	if (r) return r;
 
-	u32 rootOffset = reader::readU32(mFileData + 0xc, mHeader.mByteOrder);
-
-	mOffset = mFileData + rootOffset;
-
-	initKeyOrder();
+	if (mHeader.mRootOffset) {
+		mOffset = mFileData + mHeader.mRootOffset;
+		initKeyOrder();
+	}
 
 	return 0;
 }
 
-result_t Reader::init(const u8* fileData, const u8* offset) {
+result_t Reader::init(const Reader& other, const u32 offset) {
 	result_t r;
 
-	mFileData = fileData;
-	mOffset = offset;
-
-	r = initHeader();
-	if (r) return r;
+	mHeader = other.mHeader;
+	mFileData = other.mFileData;
+	mOffset = mFileData + offset;
 
 	initKeyOrder();
 
@@ -90,10 +89,12 @@ NodeType Reader::getType() const {
 }
 
 u32 Reader::getSize() const {
+	if (mOffset == nullptr || getType() == NodeType::Null) return 0;
+
 	return reader::readU24(mOffset + 1, mHeader.mByteOrder);
 }
 
-std::string Reader::getHashString(u32 idx) const {
+const std::string Reader::getHashString(u32 idx) const {
 	if (idx >= mHeader.mHashKeyTableSize) return "(null)";
 
 	const u8* base = mFileData + mHeader.mHashKeyTableOffset;
@@ -101,7 +102,7 @@ std::string Reader::getHashString(u32 idx) const {
 	return reader::readString(strOffset);
 }
 
-std::string Reader::getValueString(u32 idx) const {
+const std::string Reader::getValueString(u32 idx) const {
 	if (idx >= mHeader.mStringValueTableSize) return "(null)";
 
 	const u8* base = mFileData + mHeader.mStringValueTableOffset;
@@ -163,15 +164,13 @@ result_t Reader::getTypeByIdx(NodeType* type, u32 idx) const {
 	return 0;
 }
 
-result_t Reader::getKeyByIdx(u32* key, u32 idx) const {
-	if (getType() != NodeType::Hash) return Error::WrongNodeType;
-
-	if (idx >= getSize()) return Error::OutOfBounds;
+const std::string Reader::getKeyByIdx(u32 idx) const {
+	if ((getType() != NodeType::Hash) || (idx >= getSize())) return "(null)";
 
 	u32 keyIdx = mKeyOrder.at(idx);
-	*key = reader::readU24(mOffset + 4 + keyIdx * 8, mHeader.mByteOrder);
+	u32 keyValue = reader::readU24(mOffset + 4 + keyIdx * 8, mHeader.mByteOrder);
 
-	return 0;
+	return getHashString(keyValue);
 }
 
 result_t Reader::getContainerByIdx(Reader* container, u32 idx) const {
@@ -183,7 +182,7 @@ result_t Reader::getContainerByIdx(Reader* container, u32 idx) const {
 	if (childType != NodeType::Array && childType != NodeType::Hash) return Error::WrongNodeType;
 
 	u32 value = reader::readU32(valueOffset, mHeader.mByteOrder);
-	container->init(mFileData, (const u8*)(mFileData + value));
+	container->init(*this, value);
 	return 0;
 }
 
@@ -311,7 +310,7 @@ result_t Reader::getContainerByKey(Reader* container, const std::string& key) co
 			if (type != NodeType::Array && type != NodeType::Hash) return Error::WrongNodeType;
 
 			u32 value = reader::readU32(childOffset + 4, mHeader.mByteOrder);
-			container->init(mFileData, (const u8*)(mFileData + value));
+			container->init(*this, value);
 
 			return 0;
 		}
@@ -320,8 +319,9 @@ result_t Reader::getContainerByKey(Reader* container, const std::string& key) co
 	return Error::InvalidKey;
 }
 
-result_t Reader::getNodeByKey(const u8** offset, const std::string& key, NodeType expectedType)
-	const {
+result_t Reader::getNodeByKey(
+	const u8** offset, const std::string& key, NodeType expectedType
+) const {
 	if (getType() != NodeType::Hash) return Error::WrongNodeType;
 
 	// TODO: implement binary search

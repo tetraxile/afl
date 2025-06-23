@@ -44,6 +44,8 @@ private:
 		bool isEmpty() const { return size() == 0; }
 
 		u32 calcSize() const {
+			if (mStrings.empty()) return 0;
+
 			u32 headerSize = 8 + 4 * size();
 			u32 stringsSize = 0;
 			for (const auto& str : mStrings)

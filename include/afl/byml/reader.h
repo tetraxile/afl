@@ -9,10 +9,10 @@ class Reader {
 public:
 	Reader();
 	result_t init(const u8* fileData);
-	result_t init(const u8* fileData, const u8* offset);
+	result_t init(const Reader& other, const u32 offset);
 
-	std::string getHashString(u32 idx) const;
-	std::string getValueString(u32 idx) const;
+	const std::string getHashString(u32 idx) const;
+	const std::string getValueString(u32 idx) const;
 	bool isExistHashString(const std::string& str) const;
 	bool isExistStringValue(const std::string& str) const;
 
@@ -22,7 +22,7 @@ public:
 
 	result_t getTypeByIdx(NodeType* type, u32 idx) const;
 	result_t getTypeByKey(NodeType* type, const std::string& key) const;
-	result_t getKeyByIdx(u32* key, u32 idx) const;
+	const std::string getKeyByIdx(u32 idx) const;
 
 	result_t getContainerByIdx(Reader* container, u32 idx) const;
 	result_t getStringByIdx(std::string* out, u32 idx) const;
@@ -108,6 +108,8 @@ private:
 		u16 mVersion;
 		u32 mHashKeyTableOffset = 0;
 		u32 mStringValueTableOffset = 0;
+		u32 mRootOffset = 0;
+
 		u32 mHashKeyTableSize = 0;
 		u32 mStringValueTableSize = 0;
 	};
