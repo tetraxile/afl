@@ -8,7 +8,7 @@
 
 namespace sarc {
 
-void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
+void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder, u32 alignment) {
 	if (byteOrder != util::ByteOrder::Little) {
 		fprintf(stderr, "error: unimplemented big-endian sarc writer\n");
 		return;
@@ -23,17 +23,17 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 	u32 filesLen = 0;
 	for (const File& file : mFiles) {
 		namesLen = util::roundUp(namesLen, 4) + file.mName.length() + 1;
-		filesLen = util::roundUp(filesLen, 0x80) + file.mData.size();
+		filesLen = util::roundUp(filesLen, alignment) + file.mData.size();
 	}
 
-	const u32 dataOffset = util::roundUp(sfntEntryStart + namesLen, 0x80);
+	const u32 dataOffset = util::roundUp(sfntEntryStart + namesLen, alignment);
 	const u32 fileSize = dataOffset + filesLen;
 
 	// file header
 	writer::writeString(out, 0x00, "SARC", false);
 	writer::writeU16LE(out, 0x04, 0x14);   // header size
 	writer::writeU16LE(out, 0x06, 0xfeff); // byte order mark
-	writer::writeU32LE(out, 0x08, fileSize);
+	// writer::writeU32LE(out, 0x08, fileSize);
 	writer::writeU32LE(out, 0x0c, dataOffset);
 	writer::writeU16LE(out, 0x10, mVersion);
 	// 0x12 - 2 bytes padding
@@ -52,6 +52,7 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 	u32 sfatEntry = sfatEntryStart;
 	u32 sfntEntry = sfntEntryStart;
 	u32 dataEntry = dataOffset;
+	u32 dataEnd = dataOffset;
 	std::unordered_map<u32, u8> hashes;
 
 	std::stable_sort(mFiles.begin(), mFiles.end(), [this](const File& i1, const File& i2) {
@@ -80,13 +81,17 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 
 		sfatEntry += 0x10;
 		sfntEntry = util::roundUp(sfntEntry + file.mName.length() + 1, 4);
-		dataEntry = util::roundUp(dataEntry + file.mData.size(), 0x80);
+		dataEnd = dataEntry + file.mData.size();
+		dataEntry = util::roundUp(dataEntry + file.mData.size(), alignment);
 	}
+
+	// TODO: figure out why file size pre-calculation above doesn't work
+	writer::writeU32LE(out, 0x08, dataEnd);
 }
 
-void Writer::save(const std::string& filename, util::ByteOrder byteOrder) {
+void Writer::save(const std::string& filename, util::ByteOrder byteOrder, u32 alignment) {
 	std::vector<u8> outputBuffer;
-	saveToVec(outputBuffer, byteOrder);
+	saveToVec(outputBuffer, byteOrder, alignment);
 	util::writeFile(filename, outputBuffer);
 }
 
