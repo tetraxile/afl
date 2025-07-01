@@ -1,5 +1,6 @@
 #include "afl/sarc/writer.h"
 
+#include <algorithm>
 #include <span>
 #include <unordered_map>
 
@@ -52,6 +53,10 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder) {
 	u32 sfntEntry = sfntEntryStart;
 	u32 dataEntry = dataOffset;
 	std::unordered_map<u32, u8> hashes;
+
+	std::stable_sort(mFiles.begin(), mFiles.end(), [this](const File& i1, const File& i2) {
+		return calcHash(i1.mName) < calcHash(i2.mName);
+	});
 
 	for (u32 i = 0; i < mFiles.size(); i++) {
 		const File& file = mFiles[i];

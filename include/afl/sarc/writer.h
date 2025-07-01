@@ -7,8 +7,13 @@ namespace sarc {
 class Writer {
 public:
 	struct File {
-		const std::string mName;
-		const std::vector<u8> mData;
+		// File(File&) = default;
+		// File(File&&) = default;
+
+		// File& operator=(File& rhs) { mName = rhs.mName; };
+
+		std::string mName;
+		std::vector<u8> mData;
 	};
 
 	Writer(u16 version = 0x100) : mVersion(version) {}
