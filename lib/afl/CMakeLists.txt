@@ -1,0 +1,21 @@
+if (NOT MSVC)
+    target_compile_options(afl PUBLIC -O2 -Wall -Werror -Wextra -Wno-unused-variable -Wno-missing-field-initializers)
+    if (WIN32)
+        target_compile_options(afl PUBLIC -static -static-libgcc -static-libstdc++)
+    endif()
+else()
+    message(FATAL_ERROR "Compiling with MSVC is not supported")
+endif()
+
+add_subdirectory(bfres)
+add_subdirectory(byml)
+add_subdirectory(sarc)
+
+target_sources(afl
+    PRIVATE
+        bffnt.cpp
+        bntx.cpp
+        util.cpp
+        yaz0.cpp
+)
+

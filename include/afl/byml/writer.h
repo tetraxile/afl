@@ -253,7 +253,6 @@ private:
 
 	const u32 mVersion;
 	s32 mStackIdx = -1;
-	Container* mRoot = nullptr;
 	std::array<Container*, STACK_SIZE> mContainerStack;
 	std::vector<Container*> mContainerList;
 	StringTable mHashKeyStringTable;

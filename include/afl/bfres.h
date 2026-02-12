@@ -556,7 +556,7 @@ private:
 class Reader {
 public:
 	Reader(const std::vector<u8>& fileContents) :
-		mContents(fileContents), mBase(&fileContents[0]) {}
+		mContents(fileContents), mBase(&mContents[0]) {}
 
 	result_t read();
 	result_t readHeader(const u8* offset);
