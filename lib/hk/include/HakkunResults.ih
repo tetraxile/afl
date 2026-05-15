@@ -1,5 +1,0 @@
-#include "hk/diag/results.h"
-
-#if __has_include_next("HakkunResults.ih")
-#include_next "HakkunResults.ih"
-#endif

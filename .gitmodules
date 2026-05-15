@@ -1,0 +1,3 @@
+[submodule "lib/hk"]
+	path = lib/hk
+	url = https://github.com/fruityloops1/LibHakkun
