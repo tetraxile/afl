@@ -1,14 +1,20 @@
 #include "mizuna/sarc/writer.h"
 
 #include <algorithm>
+#include <filesystem>
+#include <hk/diag/diag.h>
 #include <span>
 #include <unordered_map>
 
+#include "mizuna/bfres/common.h"
+#include "mizuna/byml/common.h"
 #include "mizuna/util.h"
+
+namespace fs = std::filesystem;
 
 namespace sarc {
 
-void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder, u32 alignment) {
+void Writer::saveToVec(std::vector<u8>& out, u32* outAlignment, util::ByteOrder byteOrder) {
 	if (byteOrder != util::ByteOrder::Little) {
 		fprintf(stderr, "error: unimplemented big-endian sarc writer\n");
 		return;
@@ -21,12 +27,14 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder, u32 alig
 
 	u32 namesLen = 0;
 	u32 filesLen = 0;
+	u32 maxAlignment = 0;
 	for (const File& file : mFiles) {
+		maxAlignment = std::max(maxAlignment, file.alignment);
 		namesLen = util::roundUp(namesLen, 4) + file.mName.length() + 1;
-		filesLen = util::roundUp(filesLen, alignment) + file.mData.size();
+		filesLen = util::roundUp(filesLen, file.alignment) + file.mData.size();
 	}
 
-	const u32 dataOffset = util::roundUp(sfntEntryStart + namesLen, alignment);
+	const u32 dataOffset = util::roundUp(sfntEntryStart + namesLen, maxAlignment);
 	const u32 fileSize = dataOffset + filesLen;
 
 	// file header
@@ -61,6 +69,7 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder, u32 alig
 
 	for (u32 i = 0; i < mFiles.size(); i++) {
 		const File& file = mFiles[i];
+		dataEntry = util::roundUp(dataEntry, file.alignment);
 
 		u32 filenameHash = calcHash(file.mName);
 		if (hashes.contains(filenameHash)) {
@@ -82,21 +91,39 @@ void Writer::saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder, u32 alig
 		sfatEntry += 0x10;
 		sfntEntry = util::roundUp(sfntEntry + file.mName.length() + 1, 4);
 		dataEnd = dataEntry + file.mData.size();
-		dataEntry = util::roundUp(dataEntry + file.mData.size(), alignment);
+		// dataEntry = util::roundUp(dataEntry + file.mData.size(), file);
+		dataEntry = dataEntry + file.mData.size();
 	}
 
 	// TODO: figure out why file size pre-calculation above doesn't work
 	writer::writeU32LE(out, 0x08, dataEnd);
+
+	if (outAlignment) *outAlignment = maxAlignment;
 }
 
-void Writer::save(const std::string& filename, util::ByteOrder byteOrder, u32 alignment) {
+void Writer::save(const std::string& filename, u32* alignment, util::ByteOrder byteOrder) {
 	std::vector<u8> outputBuffer;
-	saveToVec(outputBuffer, byteOrder, alignment);
+	saveToVec(outputBuffer, alignment, byteOrder);
 	util::writeFile(filename, outputBuffer);
 }
 
 void Writer::addFile(const std::string& filename, const std::vector<u8>& fileData) {
-	mFiles.push_back({ filename, fileData });
+	u32 signature4 = reader::readU32(fileData.data(), util::ByteOrder::Big);
+	u16 signature2 = reader::readU16(fileData.data(), util::ByteOrder::Little);
+
+	const std::string ext = fs::path(filename).extension().string();
+	u32 alignment;
+
+	if (signature4 == bfres::cSignature)
+		alignment = 0x1000;
+	else if (signature2 == byml::cByteOrderBig || signature2 == byml::cByteOrderLittle)
+		alignment = 0x80;
+	else if (ext == ".kcl")
+		alignment = 0x80;
+	else
+		HK_ABORT("unsupported file type with extension '%s' (unknown alignment?)", ext.c_str());
+
+	mFiles.push_back({ filename, fileData, alignment });
 }
 
 u32 Writer::calcHash(const std::string& str) const {

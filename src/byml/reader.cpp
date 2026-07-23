@@ -8,6 +8,8 @@
 #include "mizuna/byml/results.h"
 #include "mizuna/results.h"
 
+using namespace mizuna;
+
 namespace byml {
 
 Reader::Reader() {}

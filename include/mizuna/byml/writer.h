@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <set>
 #include <string>
 #include <vector>
@@ -29,7 +30,9 @@ private:
 		virtual ~Node() {}
 
 		virtual u32 calcSize() const = 0;
-		virtual void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const = 0;
+		virtual void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const = 0;
 
 		NodeType mType;
 	};
@@ -37,13 +40,17 @@ private:
 	struct BigValueNode : Node {
 		BigValueNode(NodeType type) : Node(type) {}
 
-		virtual void writeBigData(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const = 0;
+		virtual void writeBigData(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const = 0;
 		virtual u32 dataSize() const = 0;
 		virtual u32 dataAlignment() const = 0;
 
 		u32 calcSize() const override { return 4; }
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, mOffset, byteOrder);
 		}
 
@@ -103,21 +110,28 @@ private:
 		Container(NodeType type) : Node(type) {}
 
 		virtual size_t size() const = 0;
-		virtual void writeContainer(std::vector<u8>& outputBuffer, util::ByteOrder byteOrder) const = 0;
+		virtual void writeContainer(
+			std::vector<u8>& outputBuffer, util::ByteOrder byteOrder
+		) const = 0;
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, mOffset, byteOrder);
 		}
 
 		void setOffset(u32 offset) { mOffset = offset; }
 
 		u32 mOffset;
+		size_t mHash;
 	};
 
 	struct Array : Container {
 		Array() : Container(NodeType::Array) {}
 
-		void writeContainer(std::vector<u8>& outputBuffer, util::ByteOrder byteOrder) const override;
+		void writeContainer(
+			std::vector<u8>& outputBuffer, util::ByteOrder byteOrder
+		) const override;
 
 		size_t size() const override { return mNodes.size(); }
 
@@ -133,7 +147,9 @@ private:
 		Hash(const StringTable& hashKeyStringTable) :
 			Container(NodeType::Hash), mHashKeyStringTable(hashKeyStringTable) {}
 
-		void writeContainer(std::vector<u8>& outputBuffer, util::ByteOrder byteOrder) const override;
+		void writeContainer(
+			std::vector<u8>& outputBuffer, util::ByteOrder byteOrder
+		) const override;
 
 		size_t size() const override { return mNodes.size(); }
 
@@ -153,7 +169,9 @@ private:
 		String(const std::string& value, const StringTable& valueStringTable) :
 			ValueNode(NodeType::String), mValueStringTable(valueStringTable), mValue(value) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			u32 index = mValueStringTable.find(mValue);
 			writer::writeU32(outputBuffer, offset, index, byteOrder);
 		}
@@ -165,7 +183,9 @@ private:
 	struct Bool : ValueNode {
 		Bool(bool value) : ValueNode(NodeType::Bool), mValue(value) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -175,7 +195,9 @@ private:
 	struct S32 : ValueNode {
 		S32(s32 value) : ValueNode(NodeType::S32), mValue(value) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeS32(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -185,7 +207,9 @@ private:
 	struct F32 : ValueNode {
 		F32(f32 value) : ValueNode(NodeType::F32), mValue(value) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeF32(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -195,7 +219,9 @@ private:
 	struct U32 : ValueNode {
 		U32(u32 value) : ValueNode(NodeType::U32), mValue(value) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -205,7 +231,9 @@ private:
 	struct Null : ValueNode {
 		Null() : ValueNode(NodeType::Null) {}
 
-		void write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void write(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, 0, byteOrder);
 		}
 	};
@@ -222,7 +250,9 @@ private:
 
 		u32 dataAlignment() const override { return 4; }
 
-		void writeBigData(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void writeBigData(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU32(outputBuffer, offset, mData.size(), byteOrder);
 			if (mType == NodeType::Binary) {
 				writer::writeBytes(outputBuffer, offset + 4, mData);
@@ -243,7 +273,9 @@ private:
 
 		u32 dataAlignment() const override { return 8; }
 
-		void writeBigData(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void writeBigData(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeS64(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -257,7 +289,9 @@ private:
 
 		u32 dataAlignment() const override { return 8; }
 
-		void writeBigData(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void writeBigData(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeU64(outputBuffer, offset, mValue, byteOrder);
 		}
 
@@ -271,15 +305,86 @@ private:
 
 		u32 dataAlignment() const override { return 8; }
 
-		void writeBigData(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const override {
+		void writeBigData(
+			std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+		) const override {
 			writer::writeF64(outputBuffer, offset, mValue, byteOrder);
 		}
 
 		f64 mValue;
 	};
 
+	struct Hasher {
+		size_t operator()(const Node& node) {
+			size_t h1 = std::hash<u8> {}(u8(node.mType));
+			size_t h2;
+			switch (node.mType) {
+			case NodeType::Array:
+			case NodeType::Hash: {
+				h2 = static_cast<const Container&>(node).mHash;
+				break;
+			}
+			case NodeType::String: {
+				h2 = std::hash<std::string> {}(static_cast<const String&>(node).mValue);
+				break;
+			}
+			case NodeType::Binary:
+			case NodeType::BinaryAlignment: {
+				const Binary& binary = static_cast<const Binary&>(node);
+				size_t h3;
+				for (const u8 value : binary.mData) {
+					h3 ^= std::hash<u8> {}(value);
+					h2 = h3 ^ (1 << std::hash<u32> {}(binary.mAlignment));
+					break;
+				}
+			}
+			case NodeType::StringTable: {
+				return 0;
+			}
+			case NodeType::Bool: {
+				h2 = std::hash<bool> {}(static_cast<const Bool&>(node).mValue);
+				break;
+			}
+			case NodeType::S32: {
+				h2 = std::hash<s32> {}(static_cast<const S32&>(node).mValue);
+				break;
+			}
+			case NodeType::F32: {
+				h2 = std::hash<f32> {}(static_cast<const F32&>(node).mValue);
+				break;
+			}
+			case NodeType::U32: {
+				h2 = std::hash<u32> {}(static_cast<const U32&>(node).mValue);
+				break;
+			}
+			case NodeType::S64: {
+				h2 = std::hash<s64> {}(static_cast<const S64&>(node).mValue);
+				break;
+			}
+			case NodeType::U64: {
+				h2 = std::hash<u64> {}(static_cast<const U64&>(node).mValue);
+				break;
+			}
+			case NodeType::F64: {
+				h2 = std::hash<f64> {}(static_cast<const F64&>(node).mValue);
+				break;
+			}
+			case NodeType::Null: break;
+			}
+
+			return h1 ^ (h2 << 1);
+		}
+	};
+
 public:
-	Writer(u32 version) : mVersion(version) {}
+	enum Version : u32 {
+		V2 = 2,
+		V3 = 3,
+	};
+
+	Writer() = default;
+
+	void init(Version version) { mVersion = version; }
 
 	void saveToVec(std::vector<u8>& out, util::ByteOrder byteOrder = util::ByteOrder::Little);
 	void save(const std::string& filename, util::ByteOrder byteOrder = util::ByteOrder::Little);
@@ -318,7 +423,7 @@ private:
 
 	constexpr static u32 STACK_SIZE = 16;
 
-	const u32 mVersion;
+	Version mVersion;
 	s32 mStackIdx = -1;
 	std::array<Container*, STACK_SIZE> mContainerStack;
 	std::vector<Container*> mContainerList;

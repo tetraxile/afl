@@ -26,6 +26,7 @@ u32 bswap32(u32 value);
 bool isEqual(std::string str1, std::string str2);
 u32 roundUp(u32 x, u32 powerOf2);
 hk::Result readFile(std::vector<u8>& contents, const fs::path& filename);
+hk::Result readFile(std::string& contents, const fs::path& filename);
 void writeFile(const fs::path& filename, const std::vector<u8>& contents);
 void writeFile(const fs::path& filename, const std::string& contents);
 

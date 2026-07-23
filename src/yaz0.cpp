@@ -1,12 +1,12 @@
-// Yaz0 compression file format
-// explanation of format in include/yaz0.h
-
 #include "mizuna/yaz0.h"
 
 #include <algorithm>
 
+#include "hk/diag/diag.h"
 #include "mizuna/results.h"
 #include "mizuna/util.h"
+
+using namespace mizuna;
 
 namespace yaz0 {
 
@@ -18,6 +18,8 @@ hk::Result decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 
 	u32 uncompressedSize = reader::readU32(&input[4], util::ByteOrder::Big);
 	u32 alignment = reader::readU32(&input[8], util::ByteOrder::Big);
+
+	printf("decompressing Yaz0 with alignment = %#x...\n", alignment);
 
 	output.resize(uncompressedSize);
 
@@ -55,14 +57,32 @@ hk::Result decompress(std::vector<u8>& output, const std::vector<u8>& input) {
 	return hk::ResultSuccess();
 }
 
-void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignment) {
-	u32 uncompressedSize = input.size();
+void compressLv0(std::vector<u8>& output, const std::vector<u8>& input, u32 uncompressedSize) {
+	u32 readPtr = 0;   // current read cursor position in uncompressed data
+	u32 chunkDest = 0; //
 
-	output.resize(0x10);
-	writer::writeU32(output, 0x0, 0x59617a30, util::ByteOrder::Big);
-	writer::writeU32(output, 0x4, uncompressedSize, util::ByteOrder::Big);
-	writer::writeU32(output, 0x8, alignment, util::ByteOrder::Big);
+	std::vector<u8> chunk(24);
 
+	while (readPtr < uncompressedSize) {
+		u8 codeByte = 0;
+
+		for (s32 i = 7; i >= 0; i--) {
+			chunk.at(chunkDest++) = input.at(readPtr);
+			codeByte |= 1 << i;
+			readPtr += 1;
+			if (readPtr >= input.size()) break;
+		}
+
+		// write code byte and then chunk to output
+		output.push_back(codeByte);
+		for (u32 i = 0; i < chunkDest; i++) {
+			output.push_back(chunk.at(i));
+		}
+		chunkDest = 0;
+	}
+}
+
+void compressLv2(std::vector<u8>& output, const std::vector<u8>& input, u32 uncompressedSize) {
 	// TODO: remove candidates list and just keep track of first candidate,
 	// recomputing only when necessary
 	std::vector<u32> candidates;
@@ -70,9 +90,9 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 
 	std::vector<u8> chunk(24);
 
-	u32 readPtr = 0;
-	u32 chunkDest = 0;
-	u32 bufferStart = 0;
+	u32 readPtr = 0;     // current read cursor position in uncompressed data
+	u32 chunkDest = 0;   //
+	u32 bufferStart = 0; // start position of current lookback window
 
 	while (readPtr < uncompressedSize) {
 		u8 codeByte = 0;
@@ -135,6 +155,25 @@ void compress(std::vector<u8>& output, const std::vector<u8>& input, u32 alignme
 			output.push_back(chunk.at(i));
 		}
 		chunkDest = 0;
+	}
+}
+
+void compress(
+	std::vector<u8>& output, const std::vector<u8>& input, u32 alignment, CompressionLevel level
+) {
+	u32 uncompressedSize = input.size();
+	if (level == CompressionLevel::Auto) level = CompressionLevel::Lv0;
+
+	printf("compressing %u bytes at level %d...\n", uncompressedSize, (u8)level);
+
+	output.resize(0x10);
+	writer::writeU32(output, 0x0, 0x59617a30, util::ByteOrder::Big);
+	writer::writeU32(output, 0x4, uncompressedSize, util::ByteOrder::Big);
+	writer::writeU32(output, 0x8, alignment, util::ByteOrder::Big);
+
+	switch (level) {
+	case CompressionLevel::Lv0: return compressLv0(output, input, uncompressedSize);
+	case CompressionLevel::Auto: HK_ABORT("unreachable");
 	}
 }
 

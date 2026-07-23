@@ -1,0 +1,254 @@
+MSBP version 4
+
+any offsets in a block are relative to the start of the block's data,
+i.e. directly after the block's header would be offset 0
+
+blocks are padded to a multiple of 16 bytes, using the byte 0xAB as padding after the block ends
+
+
+===== file header =====
+
+offset | size | type    | description
+-------+------+---------+--------------------------------------------------------------------
+0x00   | 0x08 | char[8] | signature "MsgPrjBn"
+0x08   | 0x02 | u16     | byte order mark (0xFEFF for big endian, 0xFFFE for little endian)
+0x0a   | 0x02 | u16     | unknown (always 0?)
+0x0c   | 0x01 | u8      | text encoding (0 = UTF-8, 1 = UTF-16, 2 = UTF-32)
+0x0d   | 0x01 | u8      | version number
+0x0e   | 0x02 | u16     | number of blocks
+0x10   | 0x02 | u16     | unknown (always 0?)
+0x12   | 0x04 | u32     | file size
+0x16   | 0x0a |         | padding
+0x20   |      |         | 
+
+
+===== block header =====
+
+offset | size | type    | description
+-------+------+---------+---------------
+0x00   | 0x04 | char[4] | block type
+0x04   | 0x04 | u32     | block size
+0x08   | 0x08 |         | padding
+0x10   |      |         | 
+
+
+===== label block =====
+
+offset | size | type         | description
+-------+------+--------------+--------------------------------------------------
+0x00   | 0x10 | block header | header
+0x10   | 0x14 | u32          | hash bucket count (`n`)
+0x14   | 8*n  | bucket[n]    | hash buckets (always 29 for MSBP, 101 for MSBT)
+       |      | label[n]     | labels
+       |      |              | 
+
+===== bucket =====
+
+offset | size | type | description
+-------+------+------+--------------
+0x00   | 0x04 | u32  | number of labels
+0x04   | 0x04 | u32  | offset of labels
+0x08   |      |      | 
+
+===== label =====
+
+offset | size | type    | description
+-------+------+---------+---------------------
+0x00   | 0x01 | u8      | string length (`n`)
+0x01   | n    | char[n] | string
+n+1    | 0x04 | u32     | item index
+       |      |         | 
+
+
+===== COLOURS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "CLR1")
+0x10   | 0x04 | u32          | number of colours (`n`)
+0x14   | 4*n  | u32[n]       | RGBA colours
+       |      |              | 
+
+
+===== COLOUR LABELS BLOCK =====
+
+this is a label block with signature "CLB1"
+
+
+===== ATTRIBUTES BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "ATI2")
+0x10   | 0x04 | u32          | number of attributes (`n`)
+0x14   | 8*n  | attribute[n] | attributes
+       |      |              | 
+
+===== attribute =====
+
+offset | size | type | description
+-------+------+------+------------------------
+0x00   | 0x01 | u8   | attribute type
+0x01   | 0x01 |      | padding
+0x02   | 0x02 | u16  | attribute list index
+0x04   | 0x04 | u32  | attribute list offset
+0x08   |      |      | 
+
+
+===== ATTRIBUTE LABELS BLOCK =====
+
+this is a label block with signature "ALB1"
+
+
+===== ATTRIBUTE STRING LISTS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+----------------------------
+0x00   | 0x10 | block header | header (signature "ALI2")
+0x10   | 0x04 | u32          | number of lists (`n`)
+0x14   | 4*n  | u32[n]       | offsets to attribute lists
+       |      | attrlist[n]  | attribute lists
+       |      |              | 
+
+===== attrlist =====
+
+offset | size | type   | description
+-------+------+--------+----------------------------------
+0x00   | 0x04 | u32    | number of list items (`n`)
+0x04   | 4*n  | u32[n] | offsets to list item names
+       |      | str[n] | null-terminated list item names
+       |      |        | 
+
+
+===== TAG GROUPS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "TGG2")
+0x10   | 0x02 | u16          | number of tag groups (`n`)
+0x12   | 0x02 |              | padding
+0x14   | 4*n  | u32[n]       | offsets to tag groups
+       |      | tag group[n] | tag groups
+       |      |              | 
+
+===== tag group =====
+
+offset | size | type   | description
+-------+------+--------+---------------------------------
+0x00   | 0x02 | u16    | tag group id
+0x02   | 0x02 | u16    | number of tags (`n`)
+0x04   | 2*n  | u16[n] | tag indices (for TAG2 block)
+       |      | str    | null-terminated tag group name
+       | %4   |        | padding
+       |      |        | 
+
+
+===== TAGS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "TAG2")
+0x10   | 0x02 | u16          | number of tags (`n`)
+0x12   | 0x02 |              | padding
+0x14   | 4*n  | u32[n]       | offsets to tags
+       |      | tag[n]       | tags
+
+===== tag =====
+
+offset | size | type   | description
+-------+------+--------+----------------------------------------
+0x00   | 0x02 | u16    | number of tag parameters (`n`)
+0x02   | 2*n  | u16[n] | tag parameter indices (for TGP2 block)
+       |      | str    | null-terminated tag name
+       | %4   |        | padding
+       |      |        | 
+
+
+===== TAG PARAMETERS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "TGP2")
+0x10   | 0x02 | u16          | number of tag parameters (`n`)
+0x12   | 0x02 |              | padding
+0x14   | 4*n  | u32[n]       | offsets to tag parameters
+       |      | tagparam[n]  | tag parameters
+
+===== tagparam =====
+
+offset | size | type      | description
+-------+------+-----------+----------------------------------------
+0x00   | 0x01 | paramtype | type
+
+...if type == null:
+0x01   | 0x01 |           | padding
+0x02   | 0x02 | u16       | number of strings (`n`)
+0x04   | 2*n  | u16[n]    | string indices (for TGL2 block)
+       |      | str       | null-terminated parameter name
+       | %4   |           | padding
+       |      |           | 
+
+...else:
+0x01   |      | str       | null-terminated parameter name
+       | %4   |           | padding
+       |      |           | 
+
+===== paramtype =====
+
+value | name
+------+---------
+0x00  | u8
+0x01  | u16
+0x02  | s16
+0x05  | u32
+0x06  | f32
+0x08  | string
+0x09  | null
+
+
+===== TAG STRING LISTS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "TGL2")
+0x10   | 0x02 | u16          | number of strings (`n`)
+0x12   | 0x02 |              | padding
+0x14   | 4*n  | u32[n]       | offsets to strings
+       |      | str[n]       | null-terminated strings
+       |      |              | 
+
+
+===== STYLES BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "SYL3")
+0x10   | 0x04 | u32          | number of styles (`n`)
+0x14   | 16*n | style[n]     | styles
+       |      |              | 
+
+===== style =====
+
+offset | size | type | description
+-------+------+------+---------------------------
+0x00   | 0x04 | u32  | region width
+0x04   | 0x04 | u32  | line num
+0x08   | 0x04 | u32  | font index
+0x0c   | 0x04 | u32  | base colour index
+0x10   |      |      | 
+
+
+===== STYLE LABELS BLOCK =====
+
+this is a label block with signature "SLB1"
+
+
+===== PROJECT CONTENTS BLOCK =====
+
+offset | size | type         | description
+-------+------+--------------+---------------------------
+0x00   | 0x10 | block header | header (signature "CTI1")
+0x10   | 0x04 | u32          | number of filenames (`n`)
+0x14   | 4*n  | u32[n]       | offsets to filename strings
+       |      | str[n]       | null-terminated filename strings
+       |      |              | 

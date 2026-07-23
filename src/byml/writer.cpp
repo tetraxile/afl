@@ -127,6 +127,11 @@ hk::Result Writer::pop() {
 	// check if stack level is -1, if it is then return error
 	if (mStackIdx == -1) return ResultEmptyStack();
 
+	// Container* top = mContainerStack[mStackIdx];
+	// for (auto it = mContainerList.begin(); *it; it++) {
+	// 	if (top->mHash == (*it)->mHash && top != *it) {}
+	// }
+
 	// decrease stack level
 	mStackIdx--;
 
@@ -137,6 +142,7 @@ hk::Result Writer::addNode(Node* node) {
 	if (mStackIdx == -1) return ResultEmptyStack();
 
 	Container* top = mContainerStack[mStackIdx];
+	top->mHash ^= Hasher {}(*node);
 	assert(top && "top of stack is not initialized");
 	if (top->mType != NodeType::Array) return ResultWrongNodeType();
 
@@ -149,6 +155,7 @@ hk::Result Writer::addNode(const std::string& key, Node* node) {
 	if (mStackIdx == -1) return ResultEmptyStack();
 
 	Container* top = mContainerStack[mStackIdx];
+	top->mHash ^= Hasher {}(*node);
 	assert(top && "top of stack is not initialized");
 	if (top->mType != NodeType::Hash) return ResultWrongNodeType();
 
@@ -260,7 +267,9 @@ void Writer::StringTable::addString(const std::string& string) {
 	mStrings.insert(string);
 }
 
-void Writer::StringTable::write(std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder) const {
+void Writer::StringTable::write(
+	std::vector<u8>& outputBuffer, u32 offset, util::ByteOrder byteOrder
+) const {
 	if (isEmpty()) return;
 
 	writer::writeU8(outputBuffer, offset, (u8)NodeType::StringTable);

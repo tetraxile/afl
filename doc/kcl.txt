@@ -1,0 +1,57 @@
+KCL version 2.2
+
+===== HEADER =====
+
+offset | size | type    | description
+-------+------+---------+--------------------------------
+0x00   | 0x04 | u32     | version (02 02 00 00 = "2.2")
+0x04   | 0x04 | s32     | octree offset
+0x08   | 0x04 | s32     | model offset array offset
+0x0c   | 0x04 | s32     | model count
+0x10   | 0x0c | f32[3]  | min coordinate
+0x1c   | 0x0c | f32[3]  | max coordinate
+0x28   | 0x0c | u32[3]  | coordinate shift
+0x34   | 0x04 | s32     | prism count
+0x38   |      |         | 
+
+
+===== OCTREE NODE =====
+
+each node contains 8 consecutive child nodes, which are u32s. the most
+significant two bits are used as flags as follows.
+
+flags | description
+------+----------------------------------------------------------------------------------
+  00  | node has children, remaining bits are an index into octree for child node array
+  01  | (unused)
+  10  | leaf node, with remaining bits representing a model index
+  11  | empty leaf node
+
+
+===== MODEL OFFSET ARRAY =====
+
+this is an array of u32 model offsets that are relative to the start of the file
+
+
+===== MODEL =====
+
+note that all offsets here are relative to the start of the model, not the file
+
+offset | size | type    | description
+-------+------+---------+--------------------------------
+0x00   | 0x04 | u32     | position array offset
+0x04   | 0x04 | u32     | normal array offset
+0x08   | 0x04 | u32     | prism array offset
+0x0c   | 0x04 | u32     | octree offset
+0x10   | 0x04 | f32     | prism thickness
+0x14   | 0x0c | f32[3]  | octree origin
+0x20   | 0x0c | u32[3]  | width mask
+0x2c   | 0x04 | u32     | block width shift
+0x30   | 0x04 | u32     | x blocks shift
+0x34   | 0x04 | u32     | root xy shift
+0x38   | 0x04 | f32     | hitbox radius cap
+0x3c   |      |         | 
+
+
+
+

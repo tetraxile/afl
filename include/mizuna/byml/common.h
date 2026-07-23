@@ -23,4 +23,7 @@ enum class NodeType : u8 {
 	Null = 0xff,
 };
 
+constexpr static u16 cByteOrderLittle = 0x5942;
+constexpr static u16 cByteOrderBig = 0x4259;
+
 } // namespace byml

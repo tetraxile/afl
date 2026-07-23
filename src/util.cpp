@@ -8,6 +8,8 @@
 
 #include "mizuna/results.h"
 
+using namespace mizuna;
+
 namespace util {
 u16 bswap16(u16 value) {
 	return ((value & 0xff) << 8) | ((value & 0xff00) >> 8);
@@ -28,7 +30,7 @@ u32 roundUp(u32 x, u32 powerOf2) {
 }
 
 hk::Result readFile(std::vector<u8>& contents, const fs::path& filename) {
-	std::ifstream fstream(filename, std::ios::binary);
+	std::ifstream fstream(filename, std::ios::in | std::ios::binary);
 
 	if (fstream.eof() || fstream.fail()) {
 		return ResultFileError();
@@ -47,6 +49,31 @@ hk::Result readFile(std::vector<u8>& contents, const fs::path& filename) {
 	);
 
 	fstream.close();
+
+	return hk::ResultSuccess();
+}
+
+hk::Result readFile(std::string& contents, const fs::path& filename) {
+	std::ifstream fstream(filename, std::ios::in | std::ios::binary);
+
+	if (fstream.eof() || fstream.fail()) {
+		return ResultFileError();
+	}
+
+	// disable skipping whitespace in binary file
+	fstream.unsetf(std::ios::skipws);
+
+	fstream.seekg(0, std::ios_base::end);
+	std::streampos fileSize = fstream.tellg();
+	fstream.seekg(0, std::ios_base::beg);
+
+	std::vector<char> bytes;
+	bytes.reserve(fileSize);
+	fstream.read(bytes.data(), fileSize);
+
+	fstream.close();
+
+	contents = std::string(bytes.data(), fileSize);
 
 	return hk::ResultSuccess();
 }

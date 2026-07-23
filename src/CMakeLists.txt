@@ -10,6 +10,7 @@ endif()
 add_subdirectory(bfres)
 add_subdirectory(byml)
 add_subdirectory(sarc)
+add_subdirectory(msbp)
 
 target_sources(mizuna
     PRIVATE

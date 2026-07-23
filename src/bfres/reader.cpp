@@ -4,6 +4,8 @@
 #include "mizuna/results.h"
 #include "tinygltf/tiny_gltf.h"
 
+using namespace mizuna;
+
 namespace bfres {
 
 hk::Result Reader::read() {

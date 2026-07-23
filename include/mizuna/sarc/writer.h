@@ -14,17 +14,18 @@ public:
 
 		std::string mName;
 		std::vector<u8> mData;
+		u32 alignment;
 	};
 
 	Writer(u16 version = 0x100) : mVersion(version) {}
 
 	void saveToVec(
-		std::vector<u8>& out, util::ByteOrder byteOrder = util::ByteOrder::Little,
-		u32 alignment = 0x80
+		std::vector<u8>& out, u32* alignment = nullptr,
+		util::ByteOrder byteOrder = util::ByteOrder::Little
 	);
 	void save(
-		const std::string& filename, util::ByteOrder byteOrder = util::ByteOrder::Little,
-		u32 alignment = 0x80
+		const std::string& filename, u32* alignment = nullptr,
+		util::ByteOrder byteOrder = util::ByteOrder::Little
 	);
 
 	void addFile(const std::string& filename, const std::vector<u8>& fileData);

@@ -23,7 +23,7 @@ offset | size | type    | description
 0x00   | 0x04 | char[4] | signature ('SFAT')
 0x04   | 0x02 | u16     | header size (0xc)
 0x06   | 0x02 | u16     | number of files (up to 0x3fff)
-0x08   | 0x04 | u32     | hash multiplier (always 101)
+0x08   | 0x04 | u32     | hash multiplier (always 0x65)
 0x0c   |      |         | 
 
 

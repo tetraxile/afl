@@ -19,11 +19,11 @@ significant. if a bit is 1, copy one byte directly from the input to the
 output buffer. if the bit is 0, compressed data is ahead. read 2 bytes as
 follows:
 
-     byte 1     |    byte 2
- 0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| count |         offset        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     byte 1     |    byte 2     |    byte 3
+ 0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| count |         offset        | (extra count) |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 count: 4 bits
   number of bytes to read.

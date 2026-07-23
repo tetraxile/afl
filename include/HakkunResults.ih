@@ -1,6 +1,7 @@
 #include "mizuna/results.h"
-#include "mizuna/bfres/results.h"
 #include "mizuna/byml/results.h"
+#include "mizuna/bfres/results.h"
+#include "mizuna/msbp/results.h"
 
 #if __has_include_next("HakkunResults.ih")
 #include_next "HakkunResults.ih"

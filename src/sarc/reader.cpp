@@ -4,6 +4,8 @@
 
 #include "mizuna/results.h"
 
+using namespace mizuna;
+
 namespace sarc {
 
 hk::Result Reader::init() {
