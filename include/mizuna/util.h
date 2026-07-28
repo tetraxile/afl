@@ -98,6 +98,10 @@ hk::Result readByteOrder(util::ByteOrder* out, const u8* offset, u16 expectedBE)
 hk::Result checkSignature(const u8* offset, const std::string& expected, size_t length);
 const std::string readString(const u8* offset);
 const std::string readString(const u8* offset, size_t length);
+const std::u16string readU16String(const u8* offset);
+const std::u16string readU16String(const u8* offset, size_t length);
+const std::u32string readU32String(const u8* offset);
+const std::u32string readU32String(const u8* offset, size_t length);
 std::vector<u8> readBytes(const u8* offset, size_t size);
 } // namespace reader
 

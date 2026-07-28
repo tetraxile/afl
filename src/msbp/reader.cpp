@@ -9,9 +9,8 @@
 namespace msbp {
 
 Reader::~Reader() {
-	for (auto [k, v] : mBlocks) {
+	for (auto [k, v] : mBlocks)
 		delete v;
-	}
 }
 
 hk::Result Reader::read() {
@@ -92,13 +91,22 @@ hk::Result Reader::read() {
 	return hk::ResultSuccess();
 }
 
+hk::Result Reader::replaceTag(u16 tagGroupID, u16 tagID, std::vector<TagParam> params) {
+	if (tagGroupID >= mTagGroups.size()) return ResultBufferOverrun();
+	if (tagID >= mTagGroups[tagGroupID].tags.size()) return ResultBufferOverrun();
+
+	mTagGroups[tagGroupID].tags[tagID].params = params;
+
+	return hk::ResultSuccess();
+}
+
 hk::Result Reader::readHeader(const u8* offset) {
 	HK_TRY(reader::checkSignature(offset, "MsgPrjBn", 8));
 	HK_TRY(reader::readByteOrder(&mByteOrder, offset + 8, 0xFEFF));
 
 	u8 encodingVal = reader::readU8(offset + 0xc);
 	if (encodingVal > 2) return ResultInvalidTextEncoding();
-	mEncoding = static_cast<Encoding>(encodingVal);
+	mEncoding = static_cast<lms::Encoding>(encodingVal);
 
 	mVersion = reader::readU8(offset + 0xd);
 	if (mVersion != 4) return ResultUnsupportedVersion();
@@ -296,26 +304,26 @@ hk::Result Reader::TGP2::read(const u8* offset, u32 size, util::ByteOrder byteOr
 
 		const u8* paramStart = offset + paramOffset;
 		u8 typeVal = reader::readU8(paramStart);
-		ParamType type;
+		lms::ParamType type;
 		if (typeVal == 0)
-			type = ParamType::U8;
+			type = lms::ParamType::U8;
 		else if (typeVal == 1)
-			type = ParamType::U16;
+			type = lms::ParamType::U16;
 		else if (typeVal == 2)
-			type = ParamType::S16;
+			type = lms::ParamType::S16;
 		else if (typeVal == 5)
-			type = ParamType::U32;
+			type = lms::ParamType::U32;
 		else if (typeVal == 6)
-			type = ParamType::F32;
+			type = lms::ParamType::F32;
 		else if (typeVal == 8)
-			type = ParamType::String;
+			type = lms::ParamType::String;
 		else if (typeVal == 9)
-			type = ParamType::Null;
+			type = lms::ParamType::Null;
 		else {
 			return ResultInvalidParamType();
 		}
 
-		if (type == ParamType::Null) {
+		if (type == lms::ParamType::Null) {
 			u16 numStrings = reader::readU16(paramStart + 2, byteOrder);
 			std::vector<u16> stringIndices;
 			for (u16 j = 0; j < numStrings; j++)

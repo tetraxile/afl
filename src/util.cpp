@@ -264,6 +264,26 @@ const std::string readString(const u8* offset, size_t length) {
 	return str;
 }
 
+const std::u16string readU16String(const u8* offset) {
+	std::u16string str((const char16_t*)offset);
+	return str;
+}
+
+const std::u16string readU16String(const u8* offset, size_t length) {
+	std::u16string str((const char16_t*)offset, length);
+	return str;
+}
+
+const std::u32string readU32String(const u8* offset) {
+	std::u32string str((const char32_t*)offset);
+	return str;
+}
+
+const std::u32string readU32String(const u8* offset, size_t length) {
+	std::u32string str((const char32_t*)offset, length);
+	return str;
+}
+
 std::vector<u8> readBytes(const u8* offset, size_t size) {
 	std::vector<u8> slice(offset, offset + size);
 	return slice;

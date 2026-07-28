@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 
+#include "mizuna/lms.h"
 #include "mizuna/msbp/common.h"
 #include "mizuna/util.h"
 
@@ -22,8 +23,15 @@ public:
 	};
 
 	struct TagParam {
+		TagParam(const std::string& name, lms::ParamType type) : name(name), type(type) {}
+
+		TagParam(
+			const std::string& name, lms::ParamType type, const std::vector<std::string> strings
+		) :
+			name(name), type(type), strings(strings) {}
+
 		std::string name;
-		ParamType type;
+		lms::ParamType type;
 		std::vector<std::string> strings;
 	};
 
@@ -56,6 +64,8 @@ public:
 	const std::map<std::string, Style>& getStyles() const { return mStyles; }
 
 	const std::vector<std::string>& getFilenames() const { return mFilenames; }
+
+	hk::Result replaceTag(u16 tagGroupID, u16 tagID, std::vector<TagParam> params);
 
 private:
 	struct Block {
@@ -137,12 +147,12 @@ private:
 
 	struct TGP2 : public Block {
 		struct Param {
-			Param(ParamType type, std::string name) : type(type), name(name) {}
+			Param(lms::ParamType type, std::string name) : type(type), name(name) {}
 
-			Param(ParamType type, std::string name, std::vector<u16> stringIndices) :
+			Param(lms::ParamType type, std::string name, std::vector<u16> stringIndices) :
 				type(type), name(name), stringIndices(stringIndices) {}
 
-			ParamType type;
+			lms::ParamType type;
 			std::string name;
 			std::vector<u16> stringIndices;
 		};
@@ -190,7 +200,7 @@ private:
 	const std::vector<u8>& mContents;
 	u8 mVersion;
 	util::ByteOrder mByteOrder;
-	Encoding mEncoding;
+	lms::Encoding mEncoding;
 	u16 mNumBlocks;
 	u32 mFileSize;
 	std::map<BlockType, Block*> mBlocks;
