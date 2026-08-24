@@ -96,6 +96,7 @@ hk::ValueOrResult<NodeType> Reader::getType() const {
 }
 
 hk::ValueOrResult<NodeType> Reader::readType(const u8* offset) const {
+	if (offset == nullptr) return NodeType::Null;
 	assert(mFileData <= offset && offset < mFileData + mFileSize);
 
 	NodeType type = (NodeType)reader::readU8(offset);

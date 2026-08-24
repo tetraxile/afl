@@ -12,7 +12,9 @@ enum class CompressionLevel : u8 {
 	Lv0 = 0,     // no compression (~112.5% bigger than original file)
 };
 
-hk::Result decompress(std::vector<u8>& output, const std::vector<u8>& input);
+hk::Result decompress(
+	std::vector<u8>& output, const std::vector<u8>& input, u32* outAlignment = nullptr
+);
 void compress(
 	std::vector<u8>& output, const std::vector<u8>& input, u32 alignment,
 	CompressionLevel level = CompressionLevel::Auto

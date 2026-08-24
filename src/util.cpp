@@ -56,9 +56,7 @@ hk::Result readFile(std::vector<u8>& contents, const fs::path& filename) {
 hk::Result readFile(std::string& contents, const fs::path& filename) {
 	std::ifstream fstream(filename, std::ios::in | std::ios::binary);
 
-	if (fstream.eof() || fstream.fail()) {
-		return ResultFileError();
-	}
+	if (fstream.eof() || fstream.fail()) return ResultFileError();
 
 	// disable skipping whitespace in binary file
 	fstream.unsetf(std::ios::skipws);
